@@ -1062,7 +1062,8 @@ static void SweepEvent( TESStesselator *tess, TESSvertex *vEvent )
 	* associated "active regions" which record information about the
 	* regions between adjacent dictionary edges.
 	*/
-	if( eBottomLeft->Onext == eTopLeft ) {
+	if( eBottomLeft->Onext == eTopLeft ) 
+	{
 		/* No right-going edges -- add a temporary "fixable" edge */
 		ConnectRightVertex( tess, regUp, eBottomLeft );
 	} else {
