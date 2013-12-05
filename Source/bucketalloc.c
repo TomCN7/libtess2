@@ -50,7 +50,7 @@ struct BucketAlloc
 	unsigned int itemSize;
 	unsigned int bucketSize;
 	const char *name;
-	TESSalloc* alloc;
+	TAlloc* alloc;
 };
 
 static int CreateBucket( struct BucketAlloc* ba )
@@ -63,7 +63,7 @@ static int CreateBucket( struct BucketAlloc* ba )
 
 	// Allocate memory for the bucket
 	size = sizeof(Bucket) + ba->itemSize * ba->bucketSize;
-	bucket = (Bucket*)ba->alloc->memalloc( ba->alloc->userData, size );
+	bucket = (Bucket*)ba->alloc->MemAlloc( ba->alloc->pUserData, size );
 	if ( !bucket )
 		return 0;
 	bucket->next = 0;
@@ -96,10 +96,10 @@ static void *NextFreeItem( struct BucketAlloc *ba )
 	return *(void**)ba->freelist;
 }
 
-struct BucketAlloc* createBucketAlloc( TESSalloc* alloc, const char* name,
+struct BucketAlloc* createBucketAlloc( TAlloc* alloc, const char* name,
 									  unsigned int itemSize, unsigned int bucketSize )
 {
-	BucketAlloc* ba = (BucketAlloc*)alloc->memalloc( alloc->userData, sizeof(BucketAlloc) );
+	BucketAlloc* ba = (BucketAlloc*)alloc->MemAlloc( alloc->pUserData, sizeof(BucketAlloc) );
 
 	ba->alloc = alloc;
 	ba->name = name;
@@ -112,7 +112,7 @@ struct BucketAlloc* createBucketAlloc( TESSalloc* alloc, const char* name,
 
 	if ( !CreateBucket( ba ) )
 	{
-		alloc->memfree( alloc->userData, ba );
+		alloc->MemFree( alloc->pUserData, ba );
 		return 0;
 	}
 
@@ -176,16 +176,16 @@ void bucketFree( struct BucketAlloc *ba, void *ptr )
 
 void deleteBucketAlloc( struct BucketAlloc *ba )
 {
-	TESSalloc* alloc = ba->alloc;
+	TAlloc* alloc = ba->alloc;
 	Bucket *bucket = ba->buckets;
 	Bucket *next;
 	while ( bucket )
 	{
 		next = bucket->next;
-		alloc->memfree( alloc->userData, bucket );
+		alloc->MemFree( alloc->pUserData, bucket );
 		bucket = next;
 	}		
 	ba->freelist = 0;
 	ba->buckets = 0;
-	alloc->memfree( alloc->userData, ba );
+	alloc->MemFree( alloc->pUserData, ba );
 }

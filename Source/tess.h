@@ -45,40 +45,40 @@ extern "C" {
 
 //typedef struct TESStesselator TESStesselator;
 
-struct TESStesselator {
+struct TTesselator {
 
 	/*** state needed for collecting the input data ***/
-	TESSmesh	*mesh;		/* stores the input contours, and eventually
+	TMesh*  pMesh;		/* stores the input contours, and eventually
 						the tessellation itself */
-	int outOfMemory;
+	int     nOutOfMemory;
 
 	/*** state needed for projecting onto the sweep plane ***/
 
-	TESSreal normal[3];	/* user-specified normal (if provided) */
-	TESSreal sUnit[3];	/* unit vector in s-direction (debugging) */
-	TESSreal tUnit[3];	/* unit vector in t-direction (debugging) */
+	float   fNormal[3];	/* user-specified normal (if provided) */
+	float   fsUnit[3];	/* unit vector in s-direction (debugging) */
+	float   ftUnit[3];	/* unit vector in t-direction (debugging) */
 
-	TESSreal bmin[2];
-	TESSreal bmax[2];
+	float   fBMin[2];
+	float   fBMax[2];
 
 	/*** state needed for the line sweep ***/
-	int	windingRule;	/* rule for determining polygon interior */
+	int	    nWindingRule;	/* rule for determining polygon interior */
 
-	Dict *dict;		/* edge dictionary for sweep line */
-	PriorityQ *pq;		/* priority queue of vertex events */
-	TESSvertex *event;		/* current sweep event being processed */
+	TDict*  pDict;		/* edge dictionary for sweep line */
+	TPriorityQ* pq;		/* priority queue of vertex events */
+	TVertex* pEvent;		/* current sweep event being processed */
 
-	struct BucketAlloc* regionPool;
+	struct BucketAlloc* pRegionPool;
 
-	TESSindex vertexIndexCounter;
+	int nVertexIndexCounter;
 	
-	TESSreal *vertices;
-	TESSindex *vertexIndices;
-	int vertexCount;
-	TESSindex *elements;
-	int elementCount;
+	float*  pVertices;
+	int*    pVertexIndices;
+	int     nVertexCount;
+	int*    pElements;
+	int     nElementCount;
 
-	TESSalloc alloc;
+	TAlloc  Alloc;
 	
 	jmp_buf env;			/* place to jump to when memAllocs fail */
 };

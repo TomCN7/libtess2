@@ -57,20 +57,20 @@
 #define TransSign(u,v,w) testransSign(u,v,w)
 
 
-#define EdgeGoesLeft(e) VertLeq( (e)->Dst, (e)->Org )
-#define EdgeGoesRight(e) VertLeq( (e)->Org, (e)->Dst )
+#define EdgeGoesLeft(e) VertLeq( (e)->Dst, (e)->pOrigin )
+#define EdgeGoesRight(e) VertLeq( (e)->pOrigin, (e)->Dst )
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 #define VertL1dist(u,v) (ABS(u->s - v->s) + ABS(u->t - v->t))
 
 #define VertCCW(u,v,w) tesvertCCW(u,v,w)
 
-int tesvertLeq( TESSvertex *u, TESSvertex *v );
-TESSreal	tesedgeEval( TESSvertex *u, TESSvertex *v, TESSvertex *w );
-TESSreal	tesedgeSign( TESSvertex *u, TESSvertex *v, TESSvertex *w );
-TESSreal	testransEval( TESSvertex *u, TESSvertex *v, TESSvertex *w );
-TESSreal	testransSign( TESSvertex *u, TESSvertex *v, TESSvertex *w );
-int tesvertCCW( TESSvertex *u, TESSvertex *v, TESSvertex *w );
-void tesedgeIntersect( TESSvertex *o1, TESSvertex *d1, TESSvertex *o2, TESSvertex *d2, TESSvertex *v );
+int tesvertLeq( TVertex *u, TVertex *v );
+float	tesedgeEval( TVertex *u, TVertex *v, TVertex *w );
+float	tesedgeSign( TVertex *u, TVertex *v, TVertex *w );
+float	testransEval( TVertex *u, TVertex *v, TVertex *w );
+float	testransSign( TVertex *u, TVertex *v, TVertex *w );
+int tesvertCCW( TVertex *u, TVertex *v, TVertex *w );
+void tesedgeIntersect( TVertex *o1, TVertex *d1, TVertex *o2, TVertex *d2, TVertex *v );
 
 #endif

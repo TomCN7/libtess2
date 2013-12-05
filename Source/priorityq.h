@@ -59,46 +59,45 @@
 
 typedef void *PQkey;
 typedef int PQhandle;
-typedef struct PriorityQHeap PriorityQHeap;
+typedef struct TPriorityQHeap TPriorityQHeap;
 
 #define INV_HANDLE 0x0fffffff
 
 typedef struct { PQhandle handle; } PQnode;
 typedef struct { PQkey key; PQhandle node; } PQhandleElem;
 
-struct PriorityQHeap {
+struct TPriorityQHeap {
 
-	PQnode *nodes;
-	PQhandleElem *handles;
-	int size, max;
-	PQhandle freeList;
-	int initialized;
-
-	int (*leq)(PQkey key1, PQkey key2);
-};
-
-typedef struct PriorityQ PriorityQ;
-
-struct PriorityQ {
-	PriorityQHeap *heap;
-
-	PQkey *keys;
-	PQkey **order;
-	PQhandle size, max;
-	int initialized;
+	PQnode*         pNodes;
+	PQhandleElem*   pHandles;
+	int             nSize, nMax;
+	PQhandle        FreeList;
+	int             nInitialized;
 
 	int (*leq)(PQkey key1, PQkey key2);
 };
 
-PriorityQ *pqNewPriorityQ( TESSalloc* alloc, int size, int (*leq)(PQkey key1, PQkey key2) );
-void pqDeletePriorityQ( TESSalloc* alloc, PriorityQ *pq );
+typedef struct TPriorityQ TPriorityQ;
 
-int pqInit( TESSalloc* alloc, PriorityQ *pq );
-PQhandle pqInsert( TESSalloc* alloc, PriorityQ *pq, PQkey key );
-PQkey pqExtractMin( PriorityQ *pq );
-void pqDelete( PriorityQ *pq, PQhandle handle );
+struct TPriorityQ {
+	TPriorityQHeap* pHeap;
+	PQkey*          pKeys;
+	PQkey**         ppOrder;
+	PQhandle        Size, Max;
+	int             nInitialized;
 
-PQkey pqMinimum( PriorityQ *pq );
-int pqIsEmpty( PriorityQ *pq );
+	int (*leq)(PQkey key1, PQkey key2);
+};
+
+TPriorityQ *pqNewPriorityQ( TAlloc* alloc, int size, int (*leq)(PQkey key1, PQkey key2) );
+void pqDeletePriorityQ( TAlloc* alloc, TPriorityQ *pq );
+
+int pqInit( TAlloc* alloc, TPriorityQ *pq );
+PQhandle pqInsert( TAlloc* alloc, TPriorityQ *pq, PQkey key );
+PQkey pqExtractMin( TPriorityQ *pq );
+void pqDelete( TPriorityQ *pq, PQhandle handle );
+
+PQkey pqMinimum( TPriorityQ *pq );
+int pqIsEmpty( TPriorityQ *pq );
 
 #endif

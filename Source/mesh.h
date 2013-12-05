@@ -34,10 +34,10 @@
 
 #include "../Include/tesselator.h"
 
-typedef struct TESSmesh TESSmesh; 
-typedef struct TESSvertex TESSvertex;
-typedef struct TESSface TESSface;
-typedef struct TESShalfEdge TESShalfEdge;
+typedef struct TMesh TMesh; 
+typedef struct TVertex TVertex;
+typedef struct TFace TFace;
+typedef struct THalfEdge THalfEdge;
 typedef struct ActiveRegion ActiveRegion;
 
 /* The mesh structure is similar in spirit, notation, and operations
@@ -106,47 +106,47 @@ typedef struct ActiveRegion ActiveRegion;
 * a region which is not part of the output polygon.
 */
 
-struct TESSvertex {
-	TESSvertex *next;      /* next vertex (never NULL) */
-	TESSvertex *prev;      /* previous vertex (never NULL) */
-	TESShalfEdge *anEdge;    /* a half-edge with this origin */
+struct TVertex {
+	TVertex *pNext;      /* next vertex (never NULL) */
+	TVertex *pPrev;      /* previous vertex (never NULL) */
+	THalfEdge *pHalfEdge;    /* a half-edge with this origin */
 
 	/* Internal data (keep hidden) */
-	TESSreal coords[3];  /* vertex location in 3D */
-	TESSreal s, t;       /* projection onto the sweep plane */
+	float fCoords[3];  /* vertex location in 3D */
+	float s, t;       /* projection onto the sweep plane */
 	int pqHandle;   /* to allow deletion from priority queue */
-	TESSindex n;			/* to allow identify unique vertices */
-	TESSindex idx;			/* to allow map result to original verts */
+	int n;			/* to allow identify unique vertices */
+	int idx;			/* to allow map result to original verts */
 };
 
-struct TESSface {
-	TESSface *next;      /* next face (never NULL) */
-	TESSface *prev;      /* previous face (never NULL) */
-	TESShalfEdge *anEdge;    /* a half edge with this left face */
+struct TFace {
+	TFace *pNext;      /* next face (never NULL) */
+	TFace *pPrev;      /* previous face (never NULL) */
+	THalfEdge *pHalfEdge;    /* a half edge with this left face */
 
 	/* Internal data (keep hidden) */
-	TESSface *trail;     /* "stack" for conversion to strips */
-	TESSindex n;		/* to allow identiy unique faces */
-	char marked;     /* flag for conversion to strips */
-	char inside;     /* this face is in the polygon interior */
+	TFace *pTrail;     /* "stack" for conversion to strips */
+	int n;		/* to allow identiy unique faces */
+	char bMarked;     /* flag for conversion to strips */
+	char bInside;     /* this face is in the polygon interior */
 };
 
-struct TESShalfEdge {
-	TESShalfEdge *next;      /* doubly-linked list (prev==Sym->next) */
-	TESShalfEdge *Sym;       /* same edge, opposite direction */
-	TESShalfEdge *Onext;     /* next edge CCW around origin */
-	TESShalfEdge *Lnext;     /* next edge CCW around left face */
-	TESSvertex *Org;       /* origin vertex (Overtex too long) */
-	TESSface *Lface;     /* left face */
+struct THalfEdge {
+	THalfEdge *pNext;      /* doubly-linked list (prev==Sym->next) */
+	THalfEdge *Sym;       /* same edge, opposite direction */
+	THalfEdge *Onext;     /* next edge CCW around origin */
+	THalfEdge *Lnext;     /* next edge CCW around left face */
+	TVertex *pOrigin;       /* origin vertex (Overtex too long) */
+	TFace *Lface;     /* left face */
 
 	/* Internal data (keep hidden) */
-	ActiveRegion *activeRegion;  /* a region with this upper edge (sweep.c) */
-	int winding;    /* change in winding number when crossing
+	ActiveRegion *pActiveRegion;  /* a region with this upper edge (sweep.c) */
+	int nWinding;    /* change in winding number when crossing
 						  from the right face to the left face */
 };
 
 #define Rface   Sym->Lface
-#define Dst Sym->Org
+#define Dst Sym->pOrigin
 
 #define Oprev   Sym->Lnext
 #define Lprev   Onext->Sym
@@ -156,15 +156,15 @@ struct TESShalfEdge {
 #define Rnext   Oprev->Sym  /* 3 pointers */
 
 
-struct TESSmesh {
-	TESSvertex vHead;      /* dummy header for vertex list */
-	TESSface fHead;      /* dummy header for face list */
-	TESShalfEdge eHead;      /* dummy header for edge list */
-	TESShalfEdge eHeadSym;   /* and its symmetric counterpart */
+struct TMesh {
+	TVertex vHead;      /* dummy header for vertex list */
+	TFace fHead;      /* dummy header for face list */
+	THalfEdge eHead;      /* dummy header for edge list */
+	THalfEdge eHeadSym;   /* and its symmetric counterpart */
 
-	struct BucketAlloc* edgeBucket;
-	struct BucketAlloc* vertexBucket;
-	struct BucketAlloc* faceBucket;
+	struct BucketAlloc* pEdgeBucket;
+	struct BucketAlloc* pVertexBucket;
+	struct BucketAlloc* pFaceBucket;
 };
 
 /* The mesh operations below have three motivations: completeness,
@@ -244,24 +244,24 @@ struct TESSmesh {
 * tessMeshCheckMesh( mesh ) checks a mesh for self-consistency.
 */
 
-TESShalfEdge *tessMeshMakeEdge( TESSmesh *mesh );
-int tessMeshSplice( TESSmesh *mesh, TESShalfEdge *eOrg, TESShalfEdge *eDst );
-int tessMeshDelete( TESSmesh *mesh, TESShalfEdge *eDel );
+THalfEdge *tessMeshMakeEdge( TMesh *mesh );
+int tessMeshSplice( TMesh *mesh, THalfEdge *eOrg, THalfEdge *eDst );
+int tessMeshDelete( TMesh *mesh, THalfEdge *eDel );
 
-TESShalfEdge *tessMeshAddEdgeVertex( TESSmesh *mesh, TESShalfEdge *eOrg );
-TESShalfEdge *tessMeshSplitEdge( TESSmesh *mesh, TESShalfEdge *eOrg );
-TESShalfEdge *tessMeshConnect( TESSmesh *mesh, TESShalfEdge *eOrg, TESShalfEdge *eDst );
+THalfEdge *tessMeshAddEdgeVertex( TMesh *mesh, THalfEdge *eOrg );
+THalfEdge *tessMeshSplitEdge( TMesh *mesh, THalfEdge *eOrg );
+THalfEdge *tessMeshConnect( TMesh *mesh, THalfEdge *eOrg, THalfEdge *eDst );
 
-TESSmesh *tessMeshNewMesh( TESSalloc* alloc );
-TESSmesh *tessMeshUnion( TESSalloc* alloc, TESSmesh *mesh1, TESSmesh *mesh2 );
-int tessMeshMergeConvexFaces( TESSmesh *mesh, int maxVertsPerFace );
-void tessMeshDeleteMesh( TESSalloc* alloc, TESSmesh *mesh );
-void tessMeshZapFace( TESSmesh *mesh, TESSface *fZap );
+TMesh *tessMeshNewMesh( TAlloc* alloc );
+TMesh *tessMeshUnion( TAlloc* alloc, TMesh *mesh1, TMesh *mesh2 );
+int tessMeshMergeConvexFaces( TMesh *mesh, int maxVertsPerFace );
+void tessMeshDeleteMesh( TAlloc* alloc, TMesh *mesh );
+void tessMeshZapFace( TMesh *mesh, TFace *fZap );
 
 #ifdef NDEBUG
 #define tessMeshCheckMesh( mesh )
 #else
-void tessMeshCheckMesh( TESSmesh *mesh );
+void tessMeshCheckMesh( TMesh *mesh );
 #endif
 
 #endif

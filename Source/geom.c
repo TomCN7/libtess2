@@ -34,14 +34,14 @@
 #include "mesh.h"
 #include "geom.h"
 
-int tesvertLeq( TESSvertex *u, TESSvertex *v )
+int tesvertLeq( TVertex *u, TVertex *v )
 {
 	/* Returns TRUE if u is lexicographically <= v. */
 
 	return VertLeq( u, v );
 }
 
-TESSreal tesedgeEval( TESSvertex *u, TESSvertex *v, TESSvertex *w )
+float tesedgeEval( TVertex *u, TVertex *v, TVertex *w )
 {
 	/* Given three vertices u,v,w such that VertLeq(u,v) && VertLeq(v,w),
 	* evaluates the t-coord of the edge uw at the s-coord of the vertex v.
@@ -53,7 +53,7 @@ TESSreal tesedgeEval( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 	* let r be the negated result (this evaluates (uw)(v->s)), then
 	* r is guaranteed to satisfy MIN(u->t,w->t) <= r <= MAX(u->t,w->t).
 	*/
-	TESSreal gapL, gapR;
+	float gapL, gapR;
 
 	assert( VertLeq( u, v ) && VertLeq( v, w ));
 
@@ -71,13 +71,13 @@ TESSreal tesedgeEval( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 	return 0;
 }
 
-TESSreal tesedgeSign( TESSvertex *u, TESSvertex *v, TESSvertex *w )
+float tesedgeSign( TVertex *u, TVertex *v, TVertex *w )
 {
 	/* Returns a number whose sign matches EdgeEval(u,v,w) but which
 	* is cheaper to evaluate.  Returns > 0, == 0 , or < 0
 	* as v is above, on, or below the edge uw.
 	*/
-	TESSreal gapL, gapR;
+	float gapL, gapR;
 
 	assert( VertLeq( u, v ) && VertLeq( v, w ));
 
@@ -96,7 +96,7 @@ TESSreal tesedgeSign( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 * Define versions of EdgeSign, EdgeEval with s and t transposed.
 */
 
-TESSreal testransEval( TESSvertex *u, TESSvertex *v, TESSvertex *w )
+float testransEval( TVertex *u, TVertex *v, TVertex *w )
 {
 	/* Given three vertices u,v,w such that TransLeq(u,v) && TransLeq(v,w),
 	* evaluates the t-coord of the edge uw at the s-coord of the vertex v.
@@ -108,7 +108,7 @@ TESSreal testransEval( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 	* let r be the negated result (this evaluates (uw)(v->t)), then
 	* r is guaranteed to satisfy MIN(u->s,w->s) <= r <= MAX(u->s,w->s).
 	*/
-	TESSreal gapL, gapR;
+	float gapL, gapR;
 
 	assert( TransLeq( u, v ) && TransLeq( v, w ));
 
@@ -126,13 +126,13 @@ TESSreal testransEval( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 	return 0;
 }
 
-TESSreal testransSign( TESSvertex *u, TESSvertex *v, TESSvertex *w )
+float testransSign( TVertex *u, TVertex *v, TVertex *w )
 {
 	/* Returns a number whose sign matches TransEval(u,v,w) but which
 	* is cheaper to evaluate.  Returns > 0, == 0 , or < 0
 	* as v is above, on, or below the edge uw.
 	*/
-	TESSreal gapL, gapR;
+	float gapL, gapR;
 
 	assert( TransLeq( u, v ) && TransLeq( v, w ));
 
@@ -147,7 +147,7 @@ TESSreal testransSign( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 }
 
 
-int tesvertCCW( TESSvertex *u, TESSvertex *v, TESSvertex *w )
+int tesvertCCW( TVertex *u, TVertex *v, TVertex *w )
 {
 	/* For almost-degenerate situations, the results are not reliable.
 	* Unless the floating-point arithmetic can be performed without
@@ -195,17 +195,17 @@ double Interpolate( double a, double x, double b, double y)
 
 #endif
 
-#define Swap(a,b)	if (1) { TESSvertex *t = a; a = b; b = t; } else
+#define Swap(a,b)	if (1) { TVertex *t = a; a = b; b = t; } else
 
-void tesedgeIntersect( TESSvertex *o1, TESSvertex *d1,
-					  TESSvertex *o2, TESSvertex *d2,
-					  TESSvertex *v )
+void tesedgeIntersect( TVertex *o1, TVertex *d1,
+					  TVertex *o2, TVertex *d2,
+					  TVertex *v )
 					  /* Given edges (o1,d1) and (o2,d2), compute their point of intersection.
 					  * The computed point is guaranteed to lie in the intersection of the
 					  * bounding rectangles defined by each edge.
 					  */
 {
-	TESSreal z1, z2;
+	float z1, z2;
 
 	/* This is certainly not the most efficient way to find the intersection
 	* of two line segments, but it is very numerically stable.

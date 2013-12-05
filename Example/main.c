@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
 	float bounds[4],view[4],cx,cy,w,offx,offy;
 	float t = 0.0f;
 	Uint32 lastTime,time;
-	TESSalloc ma;
-	TESStesselator* tess = 0;
+	TAlloc ma;
+	TTesselator* tess = 0;
 	const int nvp = 6;
 	unsigned char* vflags = 0;
 	int nvflags = 0;
@@ -138,18 +138,18 @@ int main(int argc, char *argv[])
 	pool.cap = sizeof(mem);
 	pool.buf = mem;
 	memset(&ma, 0, sizeof(ma));
-	ma.memalloc = poolAlloc;
-	ma.memfree = poolFree;
-	ma.userData = (void*)&pool;
-	ma.extraVertices = 256; // realloc not provided, allow 256 extra vertices.
+	ma.MemAlloc = poolAlloc;
+	ma.MemFree = poolFree;
+	ma.pUserData = (void*)&pool;
+	ma.nExtraVertices = 256; // realloc not provided, allow 256 extra vertices.
 
 #else
 
 	memset(&ma, 0, sizeof(ma));
-	ma.memalloc = stdAlloc;
-	ma.memfree = stdFree;
-	ma.userData = (void*)&allocated;
-	ma.extraVertices = 256; // realloc not provided, allow 256 extra vertices.
+	ma.MemAlloc = stdAlloc;
+	ma.MemFree = stdFree;
+	ma.pUserData = (void*)&allocated;
+	ma.nExtraVertices = 256; // realloc not provided, allow 256 extra vertices.
 
 	tess = tessNewTess(&ma);
 	if (!tess)
