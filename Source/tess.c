@@ -351,11 +351,14 @@ int tessMeshTessellateMonoRegion(TMesh *pMesh, TFace *pFace)
 					lo = tempHalfEdge->Sym;
 			}
 			lo = lo->Lprev;
-		} else {
+		} 
+        else 
+        {
 			/* lo->Org is on the left.  We can make CCW triangles from up->Dst. */
 			while( lo->Lnext != up && (EdgeGoesRight( up->Lprev )
-				|| EdgeSign( up->Dst, up->pOrigin, up->Lprev->pOrigin ) >= 0 )) {
-					THalfEdge *tempHalfEdge= tessMeshConnect( pMesh, up, up->Lprev );
+				|| EdgeSign( up->Dst, up->pOrigin, up->Lprev->pOrigin ) >= 0 )) 
+            {
+					THalfEdge *tempHalfEdge= tessMeshConnect(pMesh, up, up->Lprev);
 					if (tempHalfEdge == NULL) return 0;
 					up = tempHalfEdge->Sym;
 			}
