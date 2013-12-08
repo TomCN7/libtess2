@@ -32,17 +32,20 @@
 #ifndef MEMALLOC_H
 #define MEMALLOC_H
 
+#include "tesselator.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "tesselator.h"
-	
-struct BucketAlloc *createBucketAlloc( TAlloc* alloc, const char *name,
-									  unsigned int itemSize, unsigned int bucketSize );
-void *bucketAlloc( struct BucketAlloc *ba);
-void bucketFree( struct BucketAlloc *ba, void *ptr );
-void deleteBucketAlloc( struct BucketAlloc *ba );
+typedef struct TBucket TBucket;
+typedef struct TBucketAlloc TBucketAlloc;
+
+TBucketAlloc *CreateBucketAlloc (TAlloc* alloc, const char *name,
+									  unsigned int itemSize, unsigned int bucketSize) ;
+void *BucketAlloc (TBucketAlloc *ba);
+void BucketFree (TBucketAlloc *ba, void *ptr) ;
+void DeleteBucketAlloc (TBucketAlloc *ba) ;
 
 #ifdef __cplusplus
 };

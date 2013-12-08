@@ -34,14 +34,14 @@
 #include "mesh.h"
 #include "geom.h"
 
-int tesvertLeq( TVertex *u, TVertex *v )
+int tesvertLeq (TVertex *u, TVertex *v) 
 {
 	/* Returns TRUE if u is lexicographically <= v. */
 
-	return VertLeq( u, v );
+	return VertLeq (u, v) ;
 }
 
-float tesedgeEval( TVertex *u, TVertex *v, TVertex *w )
+float tesedgeEval (TVertex *u, TVertex *v, TVertex *w) 
 {
 	/* Given three vertices u,v,w such that VertLeq(u,v) && VertLeq(v,w),
 	* evaluates the t-coord of the edge uw at the s-coord of the vertex v.
@@ -55,13 +55,13 @@ float tesedgeEval( TVertex *u, TVertex *v, TVertex *w )
 	*/
 	float gapL, gapR;
 
-	assert( VertLeq( u, v ) && VertLeq( v, w ));
+	assert (VertLeq (u, v)  && VertLeq (v, w) );
 
 	gapL = v->s - u->s;
 	gapR = w->s - v->s;
 
-	if( gapL + gapR > 0 ) {
-		if( gapL < gapR ) {
+	if (gapL + gapR > 0)  {
+		if (gapL < gapR)  {
 			return (v->t - u->t) + (u->t - w->t) * (gapL / (gapL + gapR));
 		} else {
 			return (v->t - w->t) + (w->t - u->t) * (gapR / (gapL + gapR));
@@ -71,7 +71,7 @@ float tesedgeEval( TVertex *u, TVertex *v, TVertex *w )
 	return 0;
 }
 
-float tesedgeSign( TVertex *u, TVertex *v, TVertex *w )
+float tesedgeSign (TVertex *u, TVertex *v, TVertex *w) 
 {
 	/* Returns a number whose sign matches EdgeEval(u,v,w) but which
 	* is cheaper to evaluate.  Returns > 0, == 0 , or < 0
@@ -79,12 +79,12 @@ float tesedgeSign( TVertex *u, TVertex *v, TVertex *w )
 	*/
 	float gapL, gapR;
 
-	assert( VertLeq( u, v ) && VertLeq( v, w ));
+	assert (VertLeq (u, v)  && VertLeq (v, w) );
 
 	gapL = v->s - u->s;
 	gapR = w->s - v->s;
 
-	if( gapL + gapR > 0 ) {
+	if (gapL + gapR > 0)  {
 		return (v->t - w->t) * gapL + (v->t - u->t) * gapR;
 	}
 	/* vertical line */
@@ -96,7 +96,7 @@ float tesedgeSign( TVertex *u, TVertex *v, TVertex *w )
 * Define versions of EdgeSign, EdgeEval with s and t transposed.
 */
 
-float testransEval( TVertex *u, TVertex *v, TVertex *w )
+float testransEval (TVertex *u, TVertex *v, TVertex *w) 
 {
 	/* Given three vertices u,v,w such that TransLeq(u,v) && TransLeq(v,w),
 	* evaluates the t-coord of the edge uw at the s-coord of the vertex v.
@@ -110,13 +110,13 @@ float testransEval( TVertex *u, TVertex *v, TVertex *w )
 	*/
 	float gapL, gapR;
 
-	assert( TransLeq( u, v ) && TransLeq( v, w ));
+	assert (TransLeq (u, v)  && TransLeq (v, w) );
 
 	gapL = v->t - u->t;
 	gapR = w->t - v->t;
 
-	if( gapL + gapR > 0 ) {
-		if( gapL < gapR ) {
+	if (gapL + gapR > 0)  {
+		if (gapL < gapR)  {
 			return (v->s - u->s) + (u->s - w->s) * (gapL / (gapL + gapR));
 		} else {
 			return (v->s - w->s) + (w->s - u->s) * (gapR / (gapL + gapR));
@@ -126,7 +126,7 @@ float testransEval( TVertex *u, TVertex *v, TVertex *w )
 	return 0;
 }
 
-float testransSign( TVertex *u, TVertex *v, TVertex *w )
+float testransSign (TVertex *u, TVertex *v, TVertex *w) 
 {
 	/* Returns a number whose sign matches TransEval(u,v,w) but which
 	* is cheaper to evaluate.  Returns > 0, == 0 , or < 0
@@ -134,12 +134,12 @@ float testransSign( TVertex *u, TVertex *v, TVertex *w )
 	*/
 	float gapL, gapR;
 
-	assert( TransLeq( u, v ) && TransLeq( v, w ));
+	assert (TransLeq (u, v)  && TransLeq (v, w) );
 
 	gapL = v->t - u->t;
 	gapR = w->t - v->t;
 
-	if( gapL + gapR > 0 ) {
+	if (gapL + gapR > 0)  {
 		return (v->s - w->s) * gapL + (v->s - u->s) * gapR;
 	}
 	/* vertical line */
@@ -147,7 +147,7 @@ float testransSign( TVertex *u, TVertex *v, TVertex *w )
 }
 
 
-int tesvertCCW( TVertex *u, TVertex *v, TVertex *w )
+int tesvertCCW (TVertex *u, TVertex *v, TVertex *w) 
 {
 	/* For almost-degenerate situations, the results are not reliable.
 	* Unless the floating-point arithmetic can be performed without
@@ -182,10 +182,10 @@ int tesvertCCW( TVertex *u, TVertex *v, TVertex *w )
 #include <stdlib.h>
 extern int RandomInterpolate;
 
-double Interpolate( double a, double x, double b, double y)
+double Interpolate (double a, double x, double b, double y)
 {
 	printf("*********************%d\n",RandomInterpolate);
-	if( RandomInterpolate ) {
+	if (RandomInterpolate)  {
 		a = 1.2 * drand48() - 0.1;
 		a = (a < 0) ? 0 : ((a > 1) ? 1 : a);
 		b = 1.0 - a;
@@ -197,9 +197,9 @@ double Interpolate( double a, double x, double b, double y)
 
 #define Swap(a,b)	if (1) { TVertex *t = a; a = b; b = t; } else
 
-void tesedgeIntersect( TVertex *o1, TVertex *d1,
+void tesedgeIntersect (TVertex *o1, TVertex *d1,
 					  TVertex *o2, TVertex *d2,
-					  TVertex *v )
+					  TVertex *v) 
 					  /* Given edges (o1,d1) and (o2,d2), compute their point of intersection.
 					  * The computed point is guaranteed to lie in the intersection of the
 					  * bounding rectangles defined by each edge.
@@ -215,47 +215,47 @@ void tesedgeIntersect( TVertex *o1, TVertex *d1,
 	* using the TransLeq ordering to find the intersection t-value.
 	*/
 
-	if( ! VertLeq( o1, d1 )) { Swap( o1, d1 ); }
-	if( ! VertLeq( o2, d2 )) { Swap( o2, d2 ); }
-	if( ! VertLeq( o1, o2 )) { Swap( o1, o2 ); Swap( d1, d2 ); }
+	if (! VertLeq (o1, d1) ) { Swap (o1, d1) ; }
+	if (! VertLeq (o2, d2) ) { Swap (o2, d2) ; }
+	if (! VertLeq (o1, o2) ) { Swap (o1, o2) ; Swap (d1, d2) ; }
 
-	if( ! VertLeq( o2, d1 )) {
+	if (! VertLeq (o2, d1) ) {
 		/* Technically, no intersection -- do our best */
 		v->s = (o2->s + d1->s) / 2;
-	} else if( VertLeq( d1, d2 )) {
+	} else if (VertLeq (d1, d2) ) {
 		/* Interpolate between o2 and d1 */
-		z1 = EdgeEval( o1, o2, d1 );
-		z2 = EdgeEval( o2, d1, d2 );
-		if( z1+z2 < 0 ) { z1 = -z1; z2 = -z2; }
-		v->s = Interpolate( z1, o2->s, z2, d1->s );
+		z1 = EdgeEval (o1, o2, d1) ;
+		z2 = EdgeEval (o2, d1, d2) ;
+		if (z1+z2 < 0)  { z1 = -z1; z2 = -z2; }
+		v->s = Interpolate (z1, o2->s, z2, d1->s) ;
 	} else {
 		/* Interpolate between o2 and d2 */
-		z1 = EdgeSign( o1, o2, d1 );
-		z2 = -EdgeSign( o1, d2, d1 );
-		if( z1+z2 < 0 ) { z1 = -z1; z2 = -z2; }
-		v->s = Interpolate( z1, o2->s, z2, d2->s );
+		z1 = EdgeSign (o1, o2, d1) ;
+		z2 = -EdgeSign (o1, d2, d1) ;
+		if (z1+z2 < 0)  { z1 = -z1; z2 = -z2; }
+		v->s = Interpolate (z1, o2->s, z2, d2->s) ;
 	}
 
 	/* Now repeat the process for t */
 
-	if( ! TransLeq( o1, d1 )) { Swap( o1, d1 ); }
-	if( ! TransLeq( o2, d2 )) { Swap( o2, d2 ); }
-	if( ! TransLeq( o1, o2 )) { Swap( o1, o2 ); Swap( d1, d2 ); }
+	if (! TransLeq (o1, d1) ) { Swap (o1, d1) ; }
+	if (! TransLeq (o2, d2) ) { Swap (o2, d2) ; }
+	if (! TransLeq (o1, o2) ) { Swap (o1, o2) ; Swap (d1, d2) ; }
 
-	if( ! TransLeq( o2, d1 )) {
+	if (! TransLeq (o2, d1) ) {
 		/* Technically, no intersection -- do our best */
 		v->t = (o2->t + d1->t) / 2;
-	} else if( TransLeq( d1, d2 )) {
+	} else if (TransLeq (d1, d2) ) {
 		/* Interpolate between o2 and d1 */
-		z1 = TransEval( o1, o2, d1 );
-		z2 = TransEval( o2, d1, d2 );
-		if( z1+z2 < 0 ) { z1 = -z1; z2 = -z2; }
-		v->t = Interpolate( z1, o2->t, z2, d1->t );
+		z1 = TransEval (o1, o2, d1) ;
+		z2 = TransEval (o2, d1, d2) ;
+		if (z1+z2 < 0)  { z1 = -z1; z2 = -z2; }
+		v->t = Interpolate (z1, o2->t, z2, d1->t) ;
 	} else {
 		/* Interpolate between o2 and d2 */
-		z1 = TransSign( o1, o2, d1 );
-		z2 = -TransSign( o1, d2, d1 );
-		if( z1+z2 < 0 ) { z1 = -z1; z2 = -z2; }
-		v->t = Interpolate( z1, o2->t, z2, d2->t );
+		z1 = TransSign (o1, o2, d1) ;
+		z2 = -TransSign (o1, d2, d1) ;
+		if (z1+z2 < 0)  { z1 = -z1; z2 = -z2; }
+		v->t = Interpolate (z1, o2->t, z2, d2->t) ;
 	}
 }

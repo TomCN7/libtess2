@@ -34,13 +34,13 @@
 
 #include "mesh.h"
 
-/* tessComputeInterior( tess ) computes the planar arrangement specified
+/* tessComputeInterior (tess)  computes the planar arrangement specified
 * by the given contours, and further subdivides this arrangement
 * into regions.  Each region is marked "inside" if it belongs
 * to the polygon, according to the rule given by tess->windingRule.
 * Each interior region is guaranteed be monotone.
 */
-int tessComputeInterior( TTesselator *tess );
+int tessComputeInterior (TTesselator *tess) ;
 
 
 /* The following is here *only* for access by debugging routines */
@@ -53,7 +53,8 @@ int tessComputeInterior( TTesselator *tess );
 * sweep line crosses each vertex, we update the affected regions.
 */
 
-struct ActiveRegion {
+struct ActiveRegion 
+{
 	THalfEdge *eUp;		/* upper edge, directed right to left */
 	TDictNode *nodeUp;	/* dictionary node corresponding to eUp */
 	int windingNumber;	/* used to determine which regions are

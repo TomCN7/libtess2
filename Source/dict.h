@@ -36,17 +36,17 @@ typedef void *TDictKey;
 typedef struct TDict TDict;
 typedef struct TDictNode TDictNode;
 
-TDict *dictNewDict( TAlloc* alloc, void *frame, int (*leq)(void *frame, TDictKey key1, TDictKey key2) );
+TDict *dictNewDict (TAlloc* alloc, void *frame, int (*leq)(void *frame, TDictKey key1, TDictKey key2)) ;
 
-void dictDeleteDict( TAlloc* alloc, TDict *dict );
+void dictDeleteDict (TAlloc* alloc, TDict *dict) ;
 
 /* Search returns the node with the smallest key greater than or equal
 * to the given key.  If there is no such key, returns a node whose
 * key is NULL.  Similarly, Succ(Max(d)) has a NULL key, etc.
 */
-TDictNode *dictSearch( TDict *dict, TDictKey key );
-TDictNode *dictInsertBefore( TDict *dict, TDictNode *node, TDictKey key );
-void dictDelete( TDict *dict, TDictNode *node );
+TDictNode *dictSearch (TDict *dict, TDictKey key) ;
+TDictNode *dictInsertBefore (TDict *dict, TDictNode *node, TDictKey key) ;
+void dictDelete (TDict *dict, TDictNode *node) ;
 
 #define dictKey(n)	((n)->Key)
 #define dictSucc(n)	((n)->pNext)
@@ -66,7 +66,7 @@ struct TDictNode {
 struct TDict {
 	TDictNode   Head;
 	void*       pFrame;
-	struct BucketAlloc* pNodePool;
+	TBucketAlloc* pNodePool;
 	int (*leq)(void *frame, TDictKey key1, TDictKey key2);
 };
 

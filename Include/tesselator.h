@@ -137,9 +137,9 @@ typedef struct TAlloc TAlloc;
 // number of expected extra vertices.  
 struct TAlloc
 {
-	void *(*MemAlloc)( void *userData, unsigned int size );
-	void *(*MemRealloc)( void *userData, void* ptr, unsigned int size );
-	void (*MemFree)( void *userData, void *ptr );
+	void *(*MemAlloc) (void *userData, unsigned int size) ;
+	void *(*MemRealloc) (void *userData, void* ptr, unsigned int size) ;
+	void (*MemFree) (void *userData, void *ptr) ;
 	void* pUserData;				// User data passed to the allocator functions.
 	int nMeshEdgeBucketSize;		// 512
 	int nMeshVertexBucketSize;	// 512
@@ -153,12 +153,12 @@ struct TAlloc
 // Use tessDeleteTess() to delete the tesselator.
 // Returns:
 //   new tesselator object.
-TTesselator* tessNewTess( TAlloc* alloc );
+TTesselator* tessNewTess (TAlloc* alloc) ;
 
 // tessDeleteTess() - Deletes a tesselator.
 // Parameters:
 //   tess - pointer to tesselator object to be deleted.
-void tessDeleteTess( TTesselator *tess );
+void tessDeleteTess (TTesselator *tess) ;
 
 // tessAddContour() - Adds a contour to be tesselated.
 // The type of the vertex coordinates is assumed to be TESSreal.
@@ -168,7 +168,7 @@ void tessDeleteTess( TTesselator *tess );
 //   pointer - pointer to the first coordinate of the first vertex in the array.
 //   stride - defines offset in bytes between consecutive vertices.
 //   count - number of vertices in contour.
-void tessAddContour( TTesselator *pTess, int nSize, const void* pointer, int stride, int count );
+void tessAddContour (TTesselator *pTess, int nSize, const void* pointer, int stride, int count) ;
 
 // tessTesselate() - tesselate contours.
 // Parameters:
@@ -180,25 +180,25 @@ void tessAddContour( TTesselator *pTess, int nSize, const void* pointer, int str
 //   normal - defines the normal of the input contours, of null the normal is calculated automatically.
 // Returns:
 //   1 if succeed, 0 if failed.
-int tessTesselate( TTesselator *tess, int windingRule, int elementType, int polySize, int vertexSize, const float* normal );
+int tessTesselate (TTesselator *tess, int windingRule, int elementType, int polySize, int vertexSize, const float* normal) ;
 
 // tessGetVertexCount() - Returns number of vertices in the tesselated output.
-int tessGetVertexCount( TTesselator *tess );
+int tessGetVertexCount (TTesselator *tess) ;
 
 // tessGetVertices() - Returns pointer to first coordinate of first vertex.
-const float* tessGetVertices( TTesselator *tess );
+const float* tessGetVertices (TTesselator *tess) ;
 
 // tessGetVertexIndices() - Returns pointer to first vertex index.
 // Vertex indices can be used to map the generated vertices to the original vertices.
 // Every point added using tessAddContour() will get a new index starting at 0.
 // New vertices generated at the intersections of segments are assigned value TESS_UNDEF.
-const int* tessGetVertexIndices( TTesselator *tess );
+const int* tessGetVertexIndices (TTesselator *tess) ;
 	
 // tessGetElementCount() - Returns number of elements in the the tesselated output.
-int tessGetElementCount( TTesselator *tess );
+int tessGetElementCount (TTesselator *tess) ;
 
 // tessGetElements() - Returns pointer to the first element.
-const int* tessGetElements( TTesselator *tess );
+const int* tessGetElements (TTesselator *tess) ;
 
 #ifdef __cplusplus
 };

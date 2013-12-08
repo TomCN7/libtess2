@@ -89,15 +89,15 @@ struct TPriorityQ {
 	int (*leq)(PQkey key1, PQkey key2);
 };
 
-TPriorityQ *pqNewPriorityQ( TAlloc* alloc, int size, int (*leq)(PQkey key1, PQkey key2) );
-void pqDeletePriorityQ( TAlloc* alloc, TPriorityQ *pq );
+TPriorityQ *pqNewPriorityQ (TAlloc* alloc, int size, int (*leq)(PQkey key1, PQkey key2)) ;
+void pqDeletePriorityQ (TAlloc* alloc, TPriorityQ *pq) ;
 
-int pqInit( TAlloc* alloc, TPriorityQ *pq );
-PQhandle pqInsert( TAlloc* alloc, TPriorityQ *pq, PQkey key );
-PQkey pqExtractMin( TPriorityQ *pq );
-void pqDelete( TPriorityQ *pq, PQhandle handle );
+int pqInit (TAlloc* alloc, TPriorityQ *pq) ;
+PQhandle pqInsert (TAlloc* alloc, TPriorityQ *pq, PQkey key) ;
+PQkey pqExtractMin (TPriorityQ *pq) ;
+void pqDelete (TPriorityQ *pq, PQhandle handle) ;
 
-PQkey pqMinimum( TPriorityQ *pq );
-int pqIsEmpty( TPriorityQ *pq );
+PQkey pqMinimum (TPriorityQ *pq) ;
+int pqIsEmpty (TPriorityQ *pq) ;
 
 #endif

@@ -11,7 +11,7 @@
 
 void* stdAlloc(void* userData, unsigned int size)
 {
-	int* allocated = ( int*)userData;
+	int* allocated =  (int*)userData;
 	*allocated += (int)size;
 	return malloc(size);
 }
@@ -28,7 +28,7 @@ struct MemPool
 	unsigned int size;
 };
 
-void* poolAlloc( void* userData, unsigned int size )
+void* poolAlloc (void* userData, unsigned int size) 
 {
 	struct MemPool* pool = (struct MemPool*)userData;
 	if (pool->size + size < pool->cap)
@@ -40,7 +40,7 @@ void* poolAlloc( void* userData, unsigned int size )
 	return 0;
 }
 
-void poolFree( void* userData, void* ptr )
+void poolFree (void* userData, void* ptr) 
 {
 	// empty
 }

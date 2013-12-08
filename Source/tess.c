@@ -50,8 +50,8 @@ static void Normalize(float v[3])
 {
 	float len = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
 
-	assert( len > 0 );
-	len = sqrtf( len );
+	assert (len > 0) ;
+	len = sqrtf (len) ;
 	v[0] /= len;
 	v[1] /= len;
 	v[2] /= len;
@@ -63,8 +63,8 @@ static int LongAxis(float v[3])
 {
 	int i = 0;
 
-	if( ABS(v[1]) > ABS(v[0]) ) { i = 1; }
-	if( ABS(v[2]) > ABS(v[i]) ) { i = 2; }
+	if (ABS(v[1]) > ABS(v[0]))  { i = 1; }
+	if (ABS(v[2]) > ABS(v[i]))  { i = 2; }
 	return i;
 }
 
@@ -237,17 +237,17 @@ void tessProjectPolygon(TTesselator *pTess)
 	sUnit[(i+2)%3] = S_UNIT_Y;
 
 	/* Now make it exactly perpendicular */
-	w = Dot( sUnit, norm );
+	w = Dot (sUnit, norm) ;
 	sUnit[0] -= w * norm[0];
 	sUnit[1] -= w * norm[1];
 	sUnit[2] -= w * norm[2];
-	Normalize( sUnit );
+	Normalize (sUnit) ;
 
 	/* Choose tUnit so that (sUnit,tUnit,norm) form a right-handed frame */
 	tUnit[0] = norm[1]*sUnit[2] - norm[2]*sUnit[1];
 	tUnit[1] = norm[2]*sUnit[0] - norm[0]*sUnit[2];
 	tUnit[2] = norm[0]*sUnit[1] - norm[1]*sUnit[0];
-	Normalize( tUnit );
+	Normalize (tUnit) ;
 #else
 	/* Project perpendicular to a coordinate axis -- better numerically */
 	sUnit[i] = 0;
@@ -262,12 +262,12 @@ void tessProjectPolygon(TTesselator *pTess)
 	/* Project the vertices onto the sweep plane */
 	for (v = vHead->pNext; v != vHead; v = v->pNext)
 	{
-		v->s = Dot( v->fCoords, sUnit );
-		v->t = Dot( v->fCoords, tUnit );
+		v->s = Dot (v->fCoords, sUnit) ;
+		v->t = Dot (v->fCoords, tUnit) ;
 	}
 	if (computedNormal) 
     {
-		CheckOrientation( pTess );
+		CheckOrientation (pTess) ;
 	}
 
 	/* Compute ST bounds. */
@@ -293,7 +293,7 @@ void tessProjectPolygon(TTesselator *pTess)
 #define AddWinding(eDst,eSrc)	(eDst->winding += eSrc->winding, \
 	eDst->Sym->winding += eSrc->Sym->winding)
 
-/* tessMeshTessellateMonoRegion( face ) tessellates a monotone region
+/* tessMeshTessellateMonoRegion (face)  tessellates a monotone region
 * (what else would it do??)  The region must consist of a single
 * loop of half-edges (see mesh.h) oriented CCW.  "Monotone" in this
 * case means that any vertical line intersects the interior of the
@@ -332,8 +332,8 @@ int tessMeshTessellateMonoRegion(TMesh *pMesh, TFace *pFace)
 	up = pFace->pHalfEdge;
 	assert(up->Lnext != up && up->Lnext->Lnext != up);
 
-	for(; VertLeq( up->Dst, up->pOrigin ); up = up->Lprev);
-	for(; VertLeq( up->pOrigin, up->Dst ); up = up->Lnext);
+	for(; VertLeq(up->Dst, up->pOrigin); up = up->Lprev);
+	for(; VertLeq(up->pOrigin, up->Dst); up = up->Lnext);
 	lo = up->Lprev;
 
 	while (up->Lnext != lo) 
@@ -344,9 +344,10 @@ int tessMeshTessellateMonoRegion(TMesh *pMesh, TFace *pFace)
 			* The EdgeGoesLeft test guarantees progress even when some triangles
 			* are CW, given that the upper and lower chains are truly monotone.
 			*/
-			while( lo->Lnext != up && (EdgeGoesLeft( lo->Lnext )
-				|| EdgeSign( lo->pOrigin, lo->Dst, lo->Lnext->Dst ) <= 0 )) {
-					THalfEdge *tempHalfEdge= tessMeshConnect( pMesh, lo->Lnext, lo );
+			while (lo->Lnext != up && (EdgeGoesLeft(lo->Lnext)
+				|| EdgeSign(lo->pOrigin, lo->Dst, lo->Lnext->Dst) <= 0)) 
+            {
+					THalfEdge *tempHalfEdge= tessMeshConnect(pMesh, lo->Lnext, lo);
 					if (tempHalfEdge == NULL) return 0;
 					lo = tempHalfEdge->Sym;
 			}
@@ -355,12 +356,12 @@ int tessMeshTessellateMonoRegion(TMesh *pMesh, TFace *pFace)
         else 
         {
 			/* lo->Org is on the left.  We can make CCW triangles from up->Dst. */
-			while( lo->Lnext != up && (EdgeGoesRight( up->Lprev )
-				|| EdgeSign( up->Dst, up->pOrigin, up->Lprev->pOrigin ) >= 0 )) 
+			while (lo->Lnext != up && (EdgeGoesRight(up->Lprev)
+				|| EdgeSign(up->Dst, up->pOrigin, up->Lprev->pOrigin) >= 0)) 
             {
-					THalfEdge *tempHalfEdge= tessMeshConnect(pMesh, up, up->Lprev);
-					if (tempHalfEdge == NULL) return 0;
-					up = tempHalfEdge->Sym;
+                THalfEdge *tempHalfEdge= tessMeshConnect(pMesh, up, up->Lprev);
+                if (tempHalfEdge == NULL) return 0;
+                up = tempHalfEdge->Sym;
 			}
 			up = up->Lnext;
 		}
@@ -369,9 +370,10 @@ int tessMeshTessellateMonoRegion(TMesh *pMesh, TFace *pFace)
 	/* Now lo->Org == up->Dst == the leftmost vertex.  The remaining region
 	* can be tessellated in a fan from this leftmost vertex.
 	*/
-	assert( lo->Lnext != up );
-	while( lo->Lnext->Lnext != up ) {
-		THalfEdge *tempHalfEdge= tessMeshConnect( pMesh, lo->Lnext, lo );
+	assert(lo->Lnext != up);
+	while (lo->Lnext->Lnext != up) 
+    {
+		THalfEdge *tempHalfEdge= tessMeshConnect(pMesh, lo->Lnext, lo);
 		if (tempHalfEdge == NULL) return 0;
 		lo = tempHalfEdge->Sym;
 	}
@@ -380,7 +382,7 @@ int tessMeshTessellateMonoRegion(TMesh *pMesh, TFace *pFace)
 }
 
 
-/* tessMeshTessellateInterior( mesh ) tessellates each region of
+/* tessMeshTessellateInterior (mesh)  tessellates each region of
 * the mesh which is marked "inside" the polygon.  Each such region
 * must be monotone.
 */
@@ -395,7 +397,7 @@ int tessMeshTessellateInterior(TMesh *pMesh)
 		next = f->pNext;
 		if (f->bInside) 
         {
-			if ( !tessMeshTessellateMonoRegion(pMesh, f)) return 0;
+			if (!tessMeshTessellateMonoRegion(pMesh, f)) return 0;
 		}
 	}
 
@@ -403,7 +405,7 @@ int tessMeshTessellateInterior(TMesh *pMesh)
 }
 
 
-/* tessMeshDiscardExterior( mesh ) zaps (ie. sets to NULL) all faces
+/* tessMeshDiscardExterior (mesh)  zaps (ie. sets to NULL) all faces
 * which are not marked "inside" the polygon.  Since further mesh operations
 * on NULL faces are not allowed, the main purpose is to clean up the
 * mesh so that exterior loops are not represented in the data structure.
@@ -424,7 +426,7 @@ void tessMeshDiscardExterior(TMesh *pMesh)
 	}
 }
 
-/* tessMeshSetWindingNumber( mesh, value, keepOnlyBoundary ) resets the
+/* tessMeshSetWindingNumber (mesh, value, keepOnlyBoundary)  resets the
 * winding numbers on all edges so that regions marked "inside" the
 * polygon have a winding number of "value", and regions outside
 * have a winding number of 0.
@@ -432,7 +434,7 @@ void tessMeshDiscardExterior(TMesh *pMesh)
 * If keepOnlyBoundary is TRUE, it also deletes all edges which do not
 * separate an interior region from an exterior one.
 */
-int tessMeshSetWindingNumber( 
+int tessMeshSetWindingNumber (
     TMesh *pMesh, int nValue, int bKeepOnlyBoundary)
 {
 	THalfEdge *e, *eNext;
@@ -534,7 +536,7 @@ TTesselator* tessNewTess(TAlloc* pAlloc)
 		pTess->Alloc.nRegionBucketSize = 16;
 	if (pTess->Alloc.nRegionBucketSize > 4096)
 		pTess->Alloc.nRegionBucketSize = 4096;
-	pTess->pRegionPool = createBucketAlloc( 
+	pTess->pRegionPool = CreateBucketAlloc (
         &pTess->Alloc, "Regions", sizeof(ActiveRegion), pTess->Alloc.nRegionBucketSize);
 
 	// Initialize to begin polygon.
@@ -557,7 +559,7 @@ void tessDeleteTess(TTesselator *pTess)
 	
 	struct TAlloc Alloc = pTess->Alloc;
 	
-	deleteBucketAlloc(pTess->pRegionPool);
+	DeleteBucketAlloc(pTess->pRegionPool);
 
 	if (pTess->pMesh != NULL) 
     {
@@ -718,7 +720,7 @@ void OutputPolymesh(TTesselator* pTess, TMesh* pMesh,
 			pHalfEdge = pFace->pHalfEdge;
 			do
 			{
-				*pElements++ = GetNeighbourFace( pHalfEdge );
+				*pElements++ = GetNeighbourFace (pHalfEdge) ;
 				pHalfEdge = pHalfEdge->Lnext;
 			}
 			while (pHalfEdge != pFace->pHalfEdge);
@@ -758,7 +760,7 @@ void OutputContours(TTesselator *pTess, TMesh *pMesh, int nVertexSize)
 		++pTess->nElementCount;
 	}
 
-	pTess->pElements = (int*)pTess->Alloc.MemAlloc( 
+	pTess->pElements = (int*)pTess->Alloc.MemAlloc (
         pTess->Alloc.pUserData, sizeof(int) * pTess->nElementCount * 2);
 	if (!pTess->pElements)
 	{
@@ -774,7 +776,7 @@ void OutputContours(TTesselator *pTess, TMesh *pMesh, int nVertexSize)
 		return;
 	}
 
-	pTess->pVertexIndices = (int*)pTess->Alloc.MemAlloc( 
+	pTess->pVertexIndices = (int*)pTess->Alloc.MemAlloc (
         pTess->Alloc.pUserData, sizeof(int) * pTess->nVertexCount);
     if (!pTess->pVertexIndices)
 	{
@@ -943,7 +945,7 @@ int tessTesselate(TTesselator *pTess, int nWindingRule, int nElementType,
 	*/
 	tessProjectPolygon(pTess);
 
-	/* tessComputeInterior( tess ) computes the planar arrangement specified
+	/* tessComputeInterior (tess)  computes the planar arrangement specified
 	* by the given contours, and further subdivides this arrangement
 	* into regions.  Each region is marked "inside" if it belongs
 	* to the polygon, according to the rule given by tess->windingRule.
@@ -970,7 +972,7 @@ int tessTesselate(TTesselator *pTess, int nWindingRule, int nElementType,
 	}
 	if (rc == 0) longjmp(pTess->env, 1);  /* could've used a label */
 
-	tessMeshCheckMesh( pMesh );
+	tessMeshCheckMesh(pMesh);
 
 	if (nElementType == TESS_BOUNDARY_CONTOURS) 
     {

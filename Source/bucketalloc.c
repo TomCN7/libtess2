@@ -35,36 +35,33 @@
 
 //#define CHECK_BOUNDS
 
-typedef struct BucketAlloc BucketAlloc;
-typedef struct Bucket Bucket;
-
-struct Bucket
+struct TBucket
 {
-	Bucket *next;
+    struct TBucket *next;
 };
 
-struct BucketAlloc
+struct TBucketAlloc
 {
-	void *freelist;
-	Bucket *buckets;
-	unsigned int itemSize;
-	unsigned int bucketSize;
-	const char *name;
-	TAlloc* alloc;
+    void *freelist;
+    struct TBucket *buckets;
+    unsigned int itemSize;
+    unsigned int bucketSize;
+    const char *name;
+    TAlloc* alloc;
 };
 
-static int CreateBucket( struct BucketAlloc* ba )
+static int CreateBucket (struct TBucketAlloc* ba) 
 {
 	size_t size;
-	Bucket* bucket;
+	struct TBucket* bucket;
 	void* freelist;
 	unsigned char* head;
 	unsigned char* it;
 
 	// Allocate memory for the bucket
-	size = sizeof(Bucket) + ba->itemSize * ba->bucketSize;
-	bucket = (Bucket*)ba->alloc->MemAlloc( ba->alloc->pUserData, size );
-	if ( !bucket )
+	size = sizeof(struct TBucket) + ba->itemSize * ba->bucketSize;
+	bucket = (struct TBucket*)ba->alloc->MemAlloc (ba->alloc->pUserData, size) ;
+	if  (!bucket) 
 		return 0;
 	bucket->next = 0;
 
@@ -74,7 +71,7 @@ static int CreateBucket( struct BucketAlloc* ba )
 
 	// Add new items to the free list.
 	freelist = ba->freelist;
-	head = (unsigned char*)bucket + sizeof(Bucket);
+	head = (unsigned char*)bucket + sizeof(struct TBucket);
 	it = head + ba->itemSize * ba->bucketSize;
 	do
 	{
@@ -84,72 +81,72 @@ static int CreateBucket( struct BucketAlloc* ba )
 		// Pointer to next location containing a free item.
 		freelist = (void*)it;
 	}
-	while ( it != head );
+	while  (it != head) ;
 	// Update pointer to next location containing a free item.
 	ba->freelist = (void*)it;
 
 	return 1;
 }
 
-static void *NextFreeItem( struct BucketAlloc *ba )
+static void *NextFreeItem (struct TBucketAlloc *ba) 
 {
 	return *(void**)ba->freelist;
 }
 
-struct BucketAlloc* createBucketAlloc( TAlloc* alloc, const char* name,
-									  unsigned int itemSize, unsigned int bucketSize )
+struct TBucketAlloc* CreateBucketAlloc (TAlloc* alloc, const char* name,
+									  unsigned int itemSize, unsigned int bucketSize) 
 {
-	BucketAlloc* ba = (BucketAlloc*)alloc->MemAlloc( alloc->pUserData, sizeof(BucketAlloc) );
+	struct TBucketAlloc* ba = (struct TBucketAlloc*)alloc->MemAlloc (alloc->pUserData, sizeof(struct TBucketAlloc)) ;
 
 	ba->alloc = alloc;
 	ba->name = name;
 	ba->itemSize = itemSize;
-	if ( ba->itemSize < sizeof(void*) )
+	if  (ba->itemSize < sizeof(void*)) 
 		ba->itemSize = sizeof(void*);
 	ba->bucketSize = bucketSize;
 	ba->freelist = 0;
 	ba->buckets = 0;
 
-	if ( !CreateBucket( ba ) )
+	if  (!CreateBucket (ba) ) 
 	{
-		alloc->MemFree( alloc->pUserData, ba );
+		alloc->MemFree (alloc->pUserData, ba) ;
 		return 0;
 	}
 
 	return ba;
 }
 
-void* bucketAlloc( struct BucketAlloc *ba )
+void* BucketAlloc (struct TBucketAlloc *ba) 
 {
 	void *it;
 
 	// If running out of memory, allocate new bucket and update the freelist.
-	if ( !ba->freelist || !NextFreeItem( ba ) )
+	if  (!ba->freelist || !NextFreeItem (ba) ) 
 	{
-		if ( !CreateBucket( ba ) )
+		if  (!CreateBucket (ba) ) 
 			return 0;
 	}
 
 	// Pop item from in front of the free list.
 	it = ba->freelist;
-	ba->freelist = NextFreeItem( ba );
+	ba->freelist = NextFreeItem (ba) ;
 
 	return it;
 }
 
-void bucketFree( struct BucketAlloc *ba, void *ptr )
+void BucketFree (struct TBucketAlloc *ba, void *ptr) 
 {
 #ifdef CHECK_BOUNDS
 	int inBounds = 0;
-	Bucket *bucket;
+	TBucket *bucket;
 
 	// Check that the pointer is allocated with this allocator.
 	bucket = ba->buckets;
-	while ( bucket )
+	while  (bucket) 
 	{
-		void *bucketMin = (void*)((unsigned char*)bucket + sizeof(Bucket));
-		void *bucketMax = (void*)((unsigned char*)bucket + sizeof(Bucket) + ba->itemSize * ba->bucketSize);
-		if ( ptr >= bucketMin && ptr < bucketMax )
+		void *bucketMin = (void*)((unsigned char*)bucket + sizeof(TBucket));
+		void *bucketMax = (void*)((unsigned char*)bucket + sizeof(TBucket) + ba->itemSize * ba->bucketSize);
+		if  (ptr >= bucketMin && ptr < bucketMax) 
 		{
 			inBounds = 1;
 			break;
@@ -157,7 +154,7 @@ void bucketFree( struct BucketAlloc *ba, void *ptr )
 		bucket = bucket->next;			
 	}		
 
-	if ( inBounds )
+	if  (inBounds) 
 	{
 		// Add the node in front of the free list.
 		*(void**)ptr = ba->freelist;
@@ -174,18 +171,18 @@ void bucketFree( struct BucketAlloc *ba, void *ptr )
 #endif
 }
 
-void deleteBucketAlloc( struct BucketAlloc *ba )
+void DeleteBucketAlloc (struct TBucketAlloc *ba) 
 {
 	TAlloc* alloc = ba->alloc;
-	Bucket *bucket = ba->buckets;
-	Bucket *next;
-	while ( bucket )
+	struct TBucket *bucket = ba->buckets;
+	struct TBucket *next;
+	while  (bucket) 
 	{
 		next = bucket->next;
-		alloc->MemFree( alloc->pUserData, bucket );
+		alloc->MemFree (alloc->pUserData, bucket) ;
 		bucket = next;
 	}		
 	ba->freelist = 0;
 	ba->buckets = 0;
-	alloc->MemFree( alloc->pUserData, ba );
+	alloc->MemFree (alloc->pUserData, ba) ;
 }

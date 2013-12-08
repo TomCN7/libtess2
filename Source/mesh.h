@@ -106,38 +106,41 @@ typedef struct ActiveRegion ActiveRegion;
 * a region which is not part of the output polygon.
 */
 
-struct TVertex {
-	TVertex *pNext;      /* next vertex (never NULL) */
-	TVertex *pPrev;      /* previous vertex (never NULL) */
-	THalfEdge *pHalfEdge;    /* a half-edge with this origin */
+struct TVertex 
+{
+	TVertex *pNext;         /* next vertex (never NULL) */
+	TVertex *pPrev;         /* previous vertex (never NULL) */
+	THalfEdge *pHalfEdge;   /* a half-edge with this origin */
 
 	/* Internal data (keep hidden) */
-	float fCoords[3];  /* vertex location in 3D */
-	float s, t;       /* projection onto the sweep plane */
-	int pqHandle;   /* to allow deletion from priority queue */
-	int n;			/* to allow identify unique vertices */
+	float fCoords[3];   /* vertex location in 3D */
+	float s, t;         /* projection onto the sweep plane */
+	int pqHandle;       /* to allow deletion from priority queue */
+	int n;			    /* to allow identify unique vertices */
 	int idx;			/* to allow map result to original verts */
 };
 
-struct TFace {
-	TFace *pNext;      /* next face (never NULL) */
-	TFace *pPrev;      /* previous face (never NULL) */
-	THalfEdge *pHalfEdge;    /* a half edge with this left face */
+struct TFace 
+{
+	TFace *pNext;           /* next face (never NULL) */
+	TFace *pPrev;           /* previous face (never NULL) */
+	THalfEdge *pHalfEdge;   /* a half edge with this left face */
 
 	/* Internal data (keep hidden) */
-	TFace *pTrail;     /* "stack" for conversion to strips */
-	int n;		/* to allow identiy unique faces */
-	char bMarked;     /* flag for conversion to strips */
-	char bInside;     /* this face is in the polygon interior */
+	TFace *pTrail;      /* "stack" for conversion to strips */
+	int n;              /* to allow identiy unique faces */
+	char bMarked;       /* flag for conversion to strips */
+	char bInside;       /* this face is in the polygon interior */
 };
 
-struct THalfEdge {
-	THalfEdge *pNext;      /* doubly-linked list (prev==Sym->next) */
+struct THalfEdge 
+{
+	THalfEdge *pNext;     /* doubly-linked list (prev==Sym->next) */
 	THalfEdge *Sym;       /* same edge, opposite direction */
 	THalfEdge *Onext;     /* next edge CCW around origin */
 	THalfEdge *Lnext;     /* next edge CCW around left face */
-	TVertex *pOrigin;       /* origin vertex (Overtex too long) */
-	TFace *Lface;     /* left face */
+	TVertex *pOrigin;     /* origin vertex (Overtex too long) */
+	TFace *Lface;         /* left face */
 
 	/* Internal data (keep hidden) */
 	ActiveRegion *pActiveRegion;  /* a region with this upper edge (sweep.c) */
@@ -146,7 +149,7 @@ struct THalfEdge {
 };
 
 #define Rface   Sym->Lface
-#define Dst Sym->pOrigin
+#define Dst     Sym->pOrigin
 
 #define Oprev   Sym->Lnext
 #define Lprev   Onext->Sym
@@ -156,15 +159,16 @@ struct THalfEdge {
 #define Rnext   Oprev->Sym  /* 3 pointers */
 
 
-struct TMesh {
-	TVertex vHead;      /* dummy header for vertex list */
-	TFace fHead;      /* dummy header for face list */
-	THalfEdge eHead;      /* dummy header for edge list */
-	THalfEdge eHeadSym;   /* and its symmetric counterpart */
+struct TMesh 
+{
+	TVertex vHead;          /* dummy header for vertex list */
+	TFace fHead;            /* dummy header for face list */
+	THalfEdge eHead;        /* dummy header for edge list */
+	THalfEdge eHeadSym;     /* and its symmetric counterpart */
 
-	struct BucketAlloc* pEdgeBucket;
-	struct BucketAlloc* pVertexBucket;
-	struct BucketAlloc* pFaceBucket;
+	struct TBucketAlloc* pEdgeBucket;
+	struct TBucketAlloc* pVertexBucket;
+	struct TBucketAlloc* pFaceBucket;
 };
 
 /* The mesh operations below have three motivations: completeness,
@@ -183,13 +187,13 @@ struct TMesh {
 *
 * ********************** Basic Edge Operations **************************
 *
-* tessMeshMakeEdge( mesh ) creates one edge, two vertices, and a loop.
+* tessMeshMakeEdge (mesh)  creates one edge, two vertices, and a loop.
 * The loop (face) consists of the two new half-edges.
 *
-* tessMeshSplice( eOrg, eDst ) is the basic operation for changing the
+* tessMeshSplice (eOrg, eDst)  is the basic operation for changing the
 * mesh connectivity and topology.  It changes the mesh so that
-*  eOrg->Onext <- OLD( eDst->Onext )
-*  eDst->Onext <- OLD( eOrg->Onext )
+*  eOrg->Onext <- OLD (eDst->Onext) 
+*  eDst->Onext <- OLD (eOrg->Onext) 
 * where OLD(...) means the value before the meshSplice operation.
 *
 * This can have two effects on the vertex structure:
@@ -202,7 +206,7 @@ struct TMesh {
 *  - if eOrg->Lface != eDst->Lface, two distinct loops are joined into one
 * In both cases, eDst->Lface is changed and eOrg->Lface is unaffected.
 *
-* tessMeshDelete( eDel ) removes the edge eDel.  There are several cases:
+* tessMeshDelete (eDel)  removes the edge eDel.  There are several cases:
 * if (eDel->Lface != eDel->Rface), we join two loops into one; the loop
 * eDel->Lface is deleted.  Otherwise, we are splitting one loop into two;
 * the newly created loop will contain eDel->Dst.  If the deletion of eDel
@@ -210,15 +214,15 @@ struct TMesh {
 *
 * ********************** Other Edge Operations **************************
 *
-* tessMeshAddEdgeVertex( eOrg ) creates a new edge eNew such that
+* tessMeshAddEdgeVertex (eOrg)  creates a new edge eNew such that
 * eNew == eOrg->Lnext, and eNew->Dst is a newly created vertex.
 * eOrg and eNew will have the same left face.
 *
-* tessMeshSplitEdge( eOrg ) splits eOrg into two edges eOrg and eNew,
+* tessMeshSplitEdge (eOrg)  splits eOrg into two edges eOrg and eNew,
 * such that eNew == eOrg->Lnext.  The new vertex is eOrg->Dst == eNew->Org.
 * eOrg and eNew will have the same left face.
 *
-* tessMeshConnect( eOrg, eDst ) creates a new edge from eOrg->Dst
+* tessMeshConnect (eOrg, eDst)  creates a new edge from eOrg->Dst
 * to eDst->Org, and returns the corresponding half-edge eNew.
 * If eOrg->Lface == eDst->Lface, this splits one loop into two,
 * and the newly created loop is eNew->Lface.  Otherwise, two disjoint
@@ -229,39 +233,39 @@ struct TMesh {
 * tessMeshNewMesh() creates a new mesh with no edges, no vertices,
 * and no loops (what we usually call a "face").
 *
-* tessMeshUnion( mesh1, mesh2 ) forms the union of all structures in
+* tessMeshUnion (mesh1, mesh2)  forms the union of all structures in
 * both meshes, and returns the new mesh (the old meshes are destroyed).
 *
-* tessMeshDeleteMesh( mesh ) will free all storage for any valid mesh.
+* tessMeshDeleteMesh (mesh)  will free all storage for any valid mesh.
 *
-* tessMeshZapFace( fZap ) destroys a face and removes it from the
+* tessMeshZapFace (fZap)  destroys a face and removes it from the
 * global face list.  All edges of fZap will have a NULL pointer as their
 * left face.  Any edges which also have a NULL pointer as their right face
 * are deleted entirely (along with any isolated vertices this produces).
 * An entire mesh can be deleted by zapping its faces, one at a time,
 * in any order.  Zapped faces cannot be used in further mesh operations!
 *
-* tessMeshCheckMesh( mesh ) checks a mesh for self-consistency.
+* tessMeshCheckMesh (mesh)  checks a mesh for self-consistency.
 */
 
-THalfEdge *tessMeshMakeEdge( TMesh *mesh );
-int tessMeshSplice( TMesh *mesh, THalfEdge *eOrg, THalfEdge *eDst );
-int tessMeshDelete( TMesh *mesh, THalfEdge *eDel );
+THalfEdge *tessMeshMakeEdge (TMesh *mesh) ;
+int tessMeshSplice (TMesh *mesh, THalfEdge *eOrg, THalfEdge *eDst) ;
+int tessMeshDelete (TMesh *mesh, THalfEdge *eDel) ;
 
-THalfEdge *tessMeshAddEdgeVertex( TMesh *mesh, THalfEdge *eOrg );
-THalfEdge *tessMeshSplitEdge( TMesh *mesh, THalfEdge *eOrg );
-THalfEdge *tessMeshConnect( TMesh *mesh, THalfEdge *eOrg, THalfEdge *eDst );
+THalfEdge *tessMeshAddEdgeVertex (TMesh *mesh, THalfEdge *eOrg) ;
+THalfEdge *tessMeshSplitEdge (TMesh *mesh, THalfEdge *eOrg) ;
+THalfEdge *tessMeshConnect (TMesh *mesh, THalfEdge *eOrg, THalfEdge *eDst) ;
 
-TMesh *tessMeshNewMesh( TAlloc* alloc );
-TMesh *tessMeshUnion( TAlloc* alloc, TMesh *mesh1, TMesh *mesh2 );
-int tessMeshMergeConvexFaces( TMesh *mesh, int maxVertsPerFace );
-void tessMeshDeleteMesh( TAlloc* alloc, TMesh *mesh );
-void tessMeshZapFace( TMesh *mesh, TFace *fZap );
+TMesh *tessMeshNewMesh (TAlloc* alloc) ;
+TMesh *tessMeshUnion (TAlloc* alloc, TMesh *mesh1, TMesh *mesh2) ;
+int tessMeshMergeConvexFaces (TMesh *mesh, int maxVertsPerFace) ;
+void tessMeshDeleteMesh (TAlloc* alloc, TMesh *mesh) ;
+void tessMeshZapFace (TMesh *mesh, TFace *fZap) ;
 
 #ifdef NDEBUG
-#define tessMeshCheckMesh( mesh )
+#define tessMeshCheckMesh (mesh) 
 #else
-void tessMeshCheckMesh( TMesh *mesh );
+void tessMeshCheckMesh (TMesh *mesh) ;
 #endif
 
 #endif

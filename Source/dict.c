@@ -35,9 +35,9 @@
 #include "dict.h"
 
 /* really tessDictListNewDict */
-TDict *dictNewDict( TAlloc* alloc, void *frame, int (*leq)(void *frame, TDictKey key1, TDictKey key2) )
+TDict *dictNewDict (TAlloc* alloc, void *frame, int (*leq)(void *frame, TDictKey key1, TDictKey key2)) 
 {
-	TDict *dict = (TDict *)alloc->MemAlloc( alloc->pUserData, sizeof( TDict ));
+	TDict *dict = (TDict *)alloc->MemAlloc (alloc->pUserData, sizeof (TDict) );
 	TDictNode *head;
 
 	if (dict == NULL) return NULL;
@@ -55,55 +55,55 @@ TDict *dictNewDict( TAlloc* alloc, void *frame, int (*leq)(void *frame, TDictKey
 		alloc->nDictNodeBucketSize = 16;
 	if (alloc->nDictNodeBucketSize > 4096)
 		alloc->nDictNodeBucketSize = 4096;
-	dict->pNodePool = createBucketAlloc( alloc, "Dict", sizeof(TDictNode), alloc->nDictNodeBucketSize );
+	dict->pNodePool = CreateBucketAlloc (alloc, "Dict", sizeof(TDictNode), alloc->nDictNodeBucketSize) ;
 
 	return dict;
 }
 
 /* really tessDictListDeleteDict */
-void dictDeleteDict( TAlloc* alloc, TDict *dict )
+void dictDeleteDict (TAlloc* alloc, TDict *dict) 
 {
-	deleteBucketAlloc( dict->pNodePool );
-	alloc->MemFree( alloc->pUserData, dict );
+	DeleteBucketAlloc (dict->pNodePool) ;
+	alloc->MemFree (alloc->pUserData, dict) ;
 }
 
 /* really tessDictListInsertBefore */
-TDictNode *dictInsertBefore( TDict *dict, TDictNode *node, TDictKey key )
+TDictNode *dictInsertBefore (TDict *dict, TDictNode *node, TDictKey key) 
 {
-	TDictNode *newNode;
+	TDictNode *pNewNode;
 
 	do {
 		node = node->pPrev;
-	} while( node->Key != NULL && ! (*dict->leq)(dict->pFrame, node->Key, key));
+	} while (node->Key != NULL && ! (*dict->leq)(dict->pFrame, node->Key, key));
 
-	newNode = (TDictNode *)bucketAlloc( dict->pNodePool );
-	if (newNode == NULL) return NULL;
+	pNewNode = (TDictNode *)BucketAlloc (dict->pNodePool) ;
+	if (pNewNode == NULL) return NULL;
 
-	newNode->Key = key;
-	newNode->pNext = node->pNext;
-	node->pNext->pPrev = newNode;
-	newNode->pPrev = node;
-	node->pNext = newNode;
+	pNewNode->Key = key;
+	pNewNode->pNext = node->pNext;
+	node->pNext->pPrev = pNewNode;
+	pNewNode->pPrev = node;
+	node->pNext = pNewNode;
 
-	return newNode;
+	return pNewNode;
 }
 
 /* really tessDictListDelete */
-void dictDelete( TDict *dict, TDictNode *node ) /*ARGSUSED*/
+void dictDelete (TDict *dict, TDictNode *node)  /*ARGSUSED*/
 {
 	node->pNext->pPrev = node->pPrev;
 	node->pPrev->pNext = node->pNext;
-	bucketFree( dict->pNodePool, node );
+	BucketFree (dict->pNodePool, node) ;
 }
 
 /* really tessDictListSearch */
-TDictNode *dictSearch( TDict *dict, TDictKey key )
+TDictNode *dictSearch (TDict *dict, TDictKey key) 
 {
 	TDictNode *node = &dict->Head;
 
 	do {
 		node = node->pNext;
-	} while( node->Key != NULL && ! (*dict->leq)(dict->pFrame, key, node->Key));
+	} while (node->Key != NULL && ! (*dict->leq)(dict->pFrame, key, node->Key));
 
 	return node;
 }

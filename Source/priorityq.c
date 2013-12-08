@@ -85,23 +85,23 @@
 
 
 /* really pqHeapNewPriorityQHeap */
-TPriorityQHeap *pqHeapNewPriorityQ( TAlloc* alloc, int size, int (*leq)(PQkey key1, PQkey key2) )
+TPriorityQHeap *pqHeapNewPriorityQ (TAlloc* alloc, int size, int (*leq)(PQkey key1, PQkey key2)) 
 {
-	TPriorityQHeap *pq = (TPriorityQHeap *)alloc->MemAlloc( alloc->pUserData, sizeof( TPriorityQHeap ));
+	TPriorityQHeap *pq = (TPriorityQHeap *)alloc->MemAlloc (alloc->pUserData, sizeof (TPriorityQHeap) );
 	if (pq == NULL) return NULL;
 
 	pq->nSize = 0;
 	pq->nMax = size;
-	pq->pNodes = (PQnode *)alloc->MemAlloc( alloc->pUserData, (size + 1) * sizeof(pq->pNodes[0]) );
+	pq->pNodes = (PQnode *)alloc->MemAlloc (alloc->pUserData, (size + 1) * sizeof(pq->pNodes[0])) ;
 	if (pq->pNodes == NULL) {
-		alloc->MemFree( alloc->pUserData, pq );
+		alloc->MemFree (alloc->pUserData, pq) ;
 		return NULL;
 	}
 
-	pq->pHandles = (PQhandleElem *)alloc->MemAlloc( alloc->pUserData, (size + 1) * sizeof(pq->pHandles[0]) );
+	pq->pHandles = (PQhandleElem *)alloc->MemAlloc (alloc->pUserData, (size + 1) * sizeof(pq->pHandles[0])) ;
 	if (pq->pHandles == NULL) {
-		alloc->MemFree( alloc->pUserData, pq->pNodes );
-		alloc->MemFree( alloc->pUserData, pq );
+		alloc->MemFree (alloc->pUserData, pq->pNodes) ;
+		alloc->MemFree (alloc->pUserData, pq) ;
 		return NULL;
 	}
 
@@ -115,15 +115,15 @@ TPriorityQHeap *pqHeapNewPriorityQ( TAlloc* alloc, int size, int (*leq)(PQkey ke
 }
 
 /* really pqHeapDeletePriorityQHeap */
-void pqHeapDeletePriorityQ( TAlloc* alloc, TPriorityQHeap *pq )
+void pqHeapDeletePriorityQ (TAlloc* alloc, TPriorityQHeap *pq) 
 {
-	alloc->MemFree( alloc->pUserData, pq->pHandles );
-	alloc->MemFree( alloc->pUserData, pq->pNodes );
-	alloc->MemFree( alloc->pUserData, pq );
+	alloc->MemFree (alloc->pUserData, pq->pHandles) ;
+	alloc->MemFree (alloc->pUserData, pq->pNodes) ;
+	alloc->MemFree (alloc->pUserData, pq) ;
 }
 
 
-static void FloatDown( TPriorityQHeap *pq, int curr )
+static void FloatDown (TPriorityQHeap *pq, int curr) 
 {
 	PQnode *n = pq->pNodes;
 	PQhandleElem *h = pq->pHandles;
@@ -131,17 +131,17 @@ static void FloatDown( TPriorityQHeap *pq, int curr )
 	int child;
 
 	hCurr = n[curr].handle;
-	for( ;; ) {
+	for (;;)  {
 		child = curr << 1;
-		if( child < pq->nSize && LEQ( h[n[child+1].handle].key,
-			h[n[child].handle].key )) {
+		if (child < pq->nSize && LEQ (h[n[child+1].handle].key,
+			h[n[child].handle].key) ) {
 				++child;
 		}
 
 		assert(child <= pq->nMax);
 
 		hChild = n[child].handle;
-		if( child > pq->nSize || LEQ( h[hCurr].key, h[hChild].key )) {
+		if (child > pq->nSize || LEQ (h[hCurr].key, h[hChild].key) ) {
 			n[curr].handle = hCurr;
 			h[hCurr].node = curr;
 			break;
@@ -153,7 +153,7 @@ static void FloatDown( TPriorityQHeap *pq, int curr )
 }
 
 
-static void FloatUp( TPriorityQHeap *pq, int curr )
+static void FloatUp (TPriorityQHeap *pq, int curr) 
 {
 	PQnode *n = pq->pNodes;
 	PQhandleElem *h = pq->pHandles;
@@ -161,10 +161,10 @@ static void FloatUp( TPriorityQHeap *pq, int curr )
 	int parent;
 
 	hCurr = n[curr].handle;
-	for( ;; ) {
+	for (;;)  {
 		parent = curr >> 1;
 		hParent = n[parent].handle;
-		if( parent == 0 || LEQ( h[hParent].key, h[hCurr].key )) {
+		if (parent == 0 || LEQ (h[hParent].key, h[hCurr].key) ) {
 			n[curr].handle = hCurr;
 			h[hCurr].node = curr;
 			break;
@@ -176,27 +176,27 @@ static void FloatUp( TPriorityQHeap *pq, int curr )
 }
 
 /* really pqHeapInit */
-void pqHeapInit( TPriorityQHeap *pq )
+void pqHeapInit (TPriorityQHeap *pq) 
 {
 	int i;
 
 	/* This method of building a heap is O(n), rather than O(n lg n). */
 
-	for( i = pq->nSize; i >= 1; --i ) {
-		FloatDown( pq, i );
+	for (i = pq->nSize; i >= 1; --i)  {
+		FloatDown (pq, i) ;
 	}
 	pq->nInitialized = TRUE;
 }
 
 /* really pqHeapInsert */
 /* returns INV_HANDLE iff out of memory */
-PQhandle pqHeapInsert( TAlloc* alloc, TPriorityQHeap *pq, PQkey keyNew )
+PQhandle pqHeapInsert (TAlloc* alloc, TPriorityQHeap *pq, PQkey keyNew) 
 {
 	int curr;
 	PQhandle free;
 
 	curr = ++ pq->nSize;
-	if( (curr*2) > pq->nMax ) {
+	if ((curr*2) > pq->nMax)  {
 		if (!alloc->MemRealloc)
 		{
 			return INV_HANDLE;
@@ -208,14 +208,14 @@ PQhandle pqHeapInsert( TAlloc* alloc, TPriorityQHeap *pq, PQkey keyNew )
 
 			// If the heap overflows, double its size.
 			pq->nMax <<= 1;
-			pq->pNodes = (PQnode *)alloc->MemRealloc( alloc->pUserData, pq->pNodes, 
-				(size_t)((pq->nMax + 1) * sizeof( pq->pNodes[0] )));
+			pq->pNodes = (PQnode *)alloc->MemRealloc (alloc->pUserData, pq->pNodes, 
+				(size_t)((pq->nMax + 1) * sizeof (pq->pNodes[0]) ));
 			if (pq->pNodes == NULL) {
 				pq->pNodes = saveNodes;	// restore ptr to free upon return 
 				return INV_HANDLE;
 			}
-			pq->pHandles = (PQhandleElem *)alloc->MemRealloc( alloc->pUserData, pq->pHandles,
-				(size_t) ((pq->nMax + 1) * sizeof( pq->pHandles[0] )));
+			pq->pHandles = (PQhandleElem *)alloc->MemRealloc (alloc->pUserData, pq->pHandles,
+				(size_t) ((pq->nMax + 1) * sizeof (pq->pHandles[0]) ));
 			if (pq->pHandles == NULL) {
 				pq->pHandles = saveHandles; // restore ptr to free upon return 
 				return INV_HANDLE;
@@ -223,7 +223,7 @@ PQhandle pqHeapInsert( TAlloc* alloc, TPriorityQHeap *pq, PQkey keyNew )
 		}
 	}
 
-	if( pq->FreeList == 0 ) {
+	if (pq->FreeList == 0)  {
 		free = curr;
 	} else {
 		free = pq->FreeList;
@@ -234,22 +234,22 @@ PQhandle pqHeapInsert( TAlloc* alloc, TPriorityQHeap *pq, PQkey keyNew )
 	pq->pHandles[free].node = curr;
 	pq->pHandles[free].key = keyNew;
 
-	if( pq->nInitialized ) {
-		FloatUp( pq, curr );
+	if (pq->nInitialized)  {
+		FloatUp (pq, curr) ;
 	}
 	assert(free != INV_HANDLE);
 	return free;
 }
 
 /* really pqHeapExtractMin */
-PQkey pqHeapExtractMin( TPriorityQHeap *pq )
+PQkey pqHeapExtractMin (TPriorityQHeap *pq) 
 {
 	PQnode *n = pq->pNodes;
 	PQhandleElem *h = pq->pHandles;
 	PQhandle hMin = n[1].handle;
 	PQkey min = h[hMin].key;
 
-	if( pq->nSize > 0 ) {
+	if (pq->nSize > 0)  {
 		n[1].handle = n[pq->nSize].handle;
 		h[n[1].handle].node = 1;
 
@@ -257,31 +257,31 @@ PQkey pqHeapExtractMin( TPriorityQHeap *pq )
 		h[hMin].node = pq->FreeList;
 		pq->FreeList = hMin;
 
-		if( -- pq->nSize > 0 ) {
-			FloatDown( pq, 1 );
+		if (-- pq->nSize > 0)  {
+			FloatDown (pq, 1) ;
 		}
 	}
 	return min;
 }
 
 /* really pqHeapDelete */
-void pqHeapDelete( TPriorityQHeap *pq, PQhandle hCurr )
+void pqHeapDelete (TPriorityQHeap *pq, PQhandle hCurr) 
 {
 	PQnode *n = pq->pNodes;
 	PQhandleElem *h = pq->pHandles;
 	int curr;
 
-	assert( hCurr >= 1 && hCurr <= pq->nMax && h[hCurr].key != NULL );
+	assert (hCurr >= 1 && hCurr <= pq->nMax && h[hCurr].key != NULL) ;
 
 	curr = h[hCurr].node;
 	n[curr].handle = n[pq->nSize].handle;
 	h[n[curr].handle].node = curr;
 
-	if( curr <= -- pq->nSize ) {
-		if( curr <= 1 || LEQ( h[n[curr>>1].handle].key, h[n[curr].handle].key )) {
-			FloatDown( pq, curr );
+	if (curr <= -- pq->nSize)  {
+		if (curr <= 1 || LEQ (h[n[curr>>1].handle].key, h[n[curr].handle].key) ) {
+			FloatDown (pq, curr) ;
 		} else {
-			FloatUp( pq, curr );
+			FloatUp (pq, curr) ;
 		}
 	}
 	h[hCurr].key = NULL;
@@ -294,22 +294,22 @@ void pqHeapDelete( TPriorityQHeap *pq, PQhandle hCurr )
 /* Now redefine all the function names to map to their "Sort" versions. */
 
 /* really tessPqSortNewPriorityQ */
-TPriorityQ *pqNewPriorityQ( TAlloc* alloc, int size, int (*leq)(PQkey key1, PQkey key2) )
+TPriorityQ *pqNewPriorityQ (TAlloc* alloc, int size, int (*leq)(PQkey key1, PQkey key2)) 
 {
-	TPriorityQ *pq = (TPriorityQ *)alloc->MemAlloc( alloc->pUserData, sizeof( TPriorityQ ));
+	TPriorityQ *pq = (TPriorityQ *)alloc->MemAlloc (alloc->pUserData, sizeof (TPriorityQ) );
 	if (pq == NULL) return NULL;
 
-	pq->pHeap = pqHeapNewPriorityQ( alloc, size, leq );
+	pq->pHeap = pqHeapNewPriorityQ (alloc, size, leq) ;
 	if (pq->pHeap == NULL) {
-		alloc->MemFree( alloc->pUserData, pq );
+		alloc->MemFree (alloc->pUserData, pq) ;
 		return NULL;
 	}
 
-//	pq->keys = (PQkey *)memAlloc( INIT_SIZE * sizeof(pq->keys[0]) );
-	pq->pKeys = (PQkey *)alloc->MemAlloc( alloc->pUserData, size * sizeof(pq->pKeys[0]) );
+//	pq->keys = (PQkey *)memAlloc (INIT_SIZE * sizeof(pq->keys[0])) ;
+	pq->pKeys = (PQkey *)alloc->MemAlloc (alloc->pUserData, size * sizeof(pq->pKeys[0])) ;
 	if (pq->pKeys == NULL) {
-		pqHeapDeletePriorityQ( alloc, pq->pHeap );
-		alloc->MemFree( alloc->pUserData, pq );
+		pqHeapDeletePriorityQ (alloc, pq->pHeap) ;
+		alloc->MemFree (alloc->pUserData, pq) ;
 		return NULL;
 	}
 
@@ -322,13 +322,13 @@ TPriorityQ *pqNewPriorityQ( TAlloc* alloc, int size, int (*leq)(PQkey key1, PQke
 }
 
 /* really tessPqSortDeletePriorityQ */
-void pqDeletePriorityQ( TAlloc* alloc, TPriorityQ *pq )
+void pqDeletePriorityQ (TAlloc* alloc, TPriorityQ *pq) 
 {
 	assert(pq != NULL); 
-	if (pq->pHeap != NULL) pqHeapDeletePriorityQ( alloc, pq->pHeap );
-	if (pq->ppOrder != NULL) alloc->MemFree( alloc->pUserData, pq->ppOrder );
-	if (pq->pKeys != NULL) alloc->MemFree( alloc->pUserData, pq->pKeys );
-	alloc->MemFree( alloc->pUserData, pq );
+	if (pq->pHeap != NULL) pqHeapDeletePriorityQ (alloc, pq->pHeap) ;
+	if (pq->ppOrder != NULL) alloc->MemFree (alloc->pUserData, pq->ppOrder) ;
+	if (pq->pKeys != NULL) alloc->MemFree (alloc->pUserData, pq->pKeys) ;
+	alloc->MemFree (alloc->pUserData, pq) ;
 }
 
 
@@ -337,7 +337,7 @@ void pqDeletePriorityQ( TAlloc* alloc, TPriorityQ *pq )
 #define Swap(a,b)   if(1){PQkey *tmp = *a; *a = *b; *b = tmp;}else
 
 /* really tessPqSortInit */
-int pqInit( TAlloc* alloc, TPriorityQ *pq )
+int pqInit (TAlloc* alloc, TPriorityQ *pq) 
 {
 	PQkey **p, **r, **i, **j, *piv;
 	struct { PQkey **p, **r; } Stack[50], *top = Stack;
@@ -347,11 +347,11 @@ int pqInit( TAlloc* alloc, TPriorityQ *pq )
 	* the handles we have returned are still valid.
 	*/
 	/*
-	pq->order = (PQkey **)memAlloc( (size_t)
-	(pq->size * sizeof(pq->order[0])) );
+	pq->order = (PQkey **)memAlloc ((size_t)
+	(pq->size * sizeof(pq->order[0]))) ;
 	*/
-	pq->ppOrder = (PQkey **)alloc->MemAlloc( alloc->pUserData,
-										  (size_t)((pq->Size+1) * sizeof(pq->ppOrder[0])) );
+	pq->ppOrder = (PQkey **)alloc->MemAlloc (alloc->pUserData,
+										  (size_t)((pq->Size+1) * sizeof(pq->ppOrder[0]))) ;
 	/* the previous line is a patch to compensate for the fact that IBM */
 	/* machines return a null on a malloc of zero bytes (unlike SGI),   */
 	/* so we have to put in this defense to guard against a memory      */
@@ -360,7 +360,7 @@ int pqInit( TAlloc* alloc, TPriorityQ *pq )
 
 	p = pq->ppOrder;
 	r = p + pq->Size - 1;
-	for( piv = pq->pKeys, i = p; i <= r; ++piv, ++i ) {
+	for (piv = pq->pKeys, i = p; i <= r; ++piv, ++i)  {
 		*i = piv;
 	}
 
@@ -368,10 +368,10 @@ int pqInit( TAlloc* alloc, TPriorityQ *pq )
 	* using randomized Quicksort
 	*/
 	top->p = p; top->r = r; ++top;
-	while( --top >= Stack ) {
+	while (--top >= Stack)  {
 		p = top->p;
 		r = top->r;
-		while( r > p + 10 ) {
+		while (r > p + 10)  {
 			seed = seed * 1539415821 + 1;
 			i = p + seed % (r - p + 1);
 			piv = *i;
@@ -380,12 +380,12 @@ int pqInit( TAlloc* alloc, TPriorityQ *pq )
 			i = p - 1;
 			j = r + 1;
 			do {
-				do { ++i; } while( GT( **i, *piv ));
-				do { --j; } while( LT( **j, *piv ));
-				Swap( i, j );
-			} while( i < j );
-			Swap( i, j ); /* Undo last swap */
-			if( i - p < r - j ) {
+				do { ++i; } while (GT (**i, *piv) );
+				do { --j; } while (LT (**j, *piv) );
+				Swap (i, j) ;
+			} while (i < j) ;
+			Swap (i, j) ; /* Undo last swap */
+			if (i - p < r - j)  {
 				top->p = j+1; top->r = r; ++top;
 				r = i-1;
 			} else {
@@ -394,9 +394,9 @@ int pqInit( TAlloc* alloc, TPriorityQ *pq )
 			}
 		}
 		/* Insertion sort small lists */
-		for( i = p+1; i <= r; ++i ) {
+		for (i = p+1; i <= r; ++i)  {
 			piv = *i;
-			for( j = i; j > p && LT( **(j-1), *piv ); --j ) {
+			for (j = i; j > p && LT (**(j-1), *piv) ; --j)  {
 				*j = *(j-1);
 			}
 			*j = piv;
@@ -404,13 +404,13 @@ int pqInit( TAlloc* alloc, TPriorityQ *pq )
 	}
 	pq->Max = pq->Size;
 	pq->nInitialized = TRUE;
-	pqHeapInit( pq->pHeap );  /* always succeeds */
+	pqHeapInit (pq->pHeap) ;  /* always succeeds */
 
 #ifndef NDEBUG
 	p = pq->ppOrder;
 	r = p + pq->Size - 1;
-	for( i = p; i < r; ++i ) {
-		assert( LEQ( **(i+1), **i ));
+	for (i = p; i < r; ++i)  {
+		assert (LEQ (**(i+1), **i) );
 	}
 #endif
 
@@ -419,15 +419,15 @@ int pqInit( TAlloc* alloc, TPriorityQ *pq )
 
 /* really tessPqSortInsert */
 /* returns INV_HANDLE iff out of memory */ 
-PQhandle pqInsert( TAlloc* alloc, TPriorityQ *pq, PQkey keyNew )
+PQhandle pqInsert (TAlloc* alloc, TPriorityQ *pq, PQkey keyNew) 
 {
 	int curr;
 
-	if( pq->nInitialized ) {
-		return pqHeapInsert( alloc, pq->pHeap, keyNew );
+	if (pq->nInitialized)  {
+		return pqHeapInsert (alloc, pq->pHeap, keyNew) ;
 	}
 	curr = pq->Size;
-	if( ++ pq->Size >= pq->Max ) {
+	if (++ pq->Size >= pq->Max)  {
 		if (!alloc->MemRealloc)
 		{
 			return INV_HANDLE;
@@ -437,8 +437,8 @@ PQhandle pqInsert( TAlloc* alloc, TPriorityQ *pq, PQkey keyNew )
 			PQkey *saveKey= pq->pKeys;
 			// If the heap overflows, double its size.
 			pq->Max <<= 1;
-			pq->pKeys = (PQkey *)alloc->MemRealloc( alloc->pUserData, pq->pKeys, 
-				(size_t)(pq->Max * sizeof( pq->pKeys[0] )));
+			pq->pKeys = (PQkey *)alloc->MemRealloc (alloc->pUserData, pq->pKeys, 
+				(size_t)(pq->Max * sizeof (pq->pKeys[0]) ));
 			if (pq->pKeys == NULL) { 
 				pq->pKeys = saveKey;  // restore ptr to free upon return 
 				return INV_HANDLE;
@@ -453,38 +453,38 @@ PQhandle pqInsert( TAlloc* alloc, TPriorityQ *pq, PQkey keyNew )
 }
 
 /* really tessPqSortExtractMin */
-PQkey pqExtractMin( TPriorityQ *pq )
+PQkey pqExtractMin (TPriorityQ *pq) 
 {
 	PQkey sortMin, heapMin;
 
-	if( pq->Size == 0 ) {
-		return pqHeapExtractMin( pq->pHeap );
+	if (pq->Size == 0)  {
+		return pqHeapExtractMin (pq->pHeap) ;
 	}
 	sortMin = *(pq->ppOrder[pq->Size-1]);
-	if( ! pqHeapIsEmpty( pq->pHeap )) {
-		heapMin = pqHeapMinimum( pq->pHeap );
-		if( LEQ( heapMin, sortMin )) {
-			return pqHeapExtractMin( pq->pHeap );
+	if (! pqHeapIsEmpty (pq->pHeap) ) {
+		heapMin = pqHeapMinimum (pq->pHeap) ;
+		if (LEQ (heapMin, sortMin) ) {
+			return pqHeapExtractMin (pq->pHeap) ;
 		}
 	}
 	do {
 		-- pq->Size;
-	} while( pq->Size > 0 && *(pq->ppOrder[pq->Size-1]) == NULL );
+	} while (pq->Size > 0 && *(pq->ppOrder[pq->Size-1]) == NULL) ;
 	return sortMin;
 }
 
 /* really tessPqSortMinimum */
-PQkey pqMinimum( TPriorityQ *pq )
+PQkey pqMinimum (TPriorityQ *pq) 
 {
 	PQkey sortMin, heapMin;
 
-	if( pq->Size == 0 ) {
-		return pqHeapMinimum( pq->pHeap );
+	if (pq->Size == 0)  {
+		return pqHeapMinimum (pq->pHeap) ;
 	}
 	sortMin = *(pq->ppOrder[pq->Size-1]);
-	if( ! pqHeapIsEmpty( pq->pHeap )) {
-		heapMin = pqHeapMinimum( pq->pHeap );
-		if( LEQ( heapMin, sortMin )) {
+	if (! pqHeapIsEmpty (pq->pHeap) ) {
+		heapMin = pqHeapMinimum (pq->pHeap) ;
+		if (LEQ (heapMin, sortMin) ) {
 			return heapMin;
 		}
 	}
@@ -492,23 +492,23 @@ PQkey pqMinimum( TPriorityQ *pq )
 }
 
 /* really tessPqSortIsEmpty */
-int pqIsEmpty( TPriorityQ *pq )
+int pqIsEmpty (TPriorityQ *pq) 
 {
-	return (pq->Size == 0) && pqHeapIsEmpty( pq->pHeap );
+	return (pq->Size == 0) && pqHeapIsEmpty (pq->pHeap) ;
 }
 
 /* really tessPqSortDelete */
-void pqDelete( TPriorityQ *pq, PQhandle curr )
+void pqDelete (TPriorityQ *pq, PQhandle curr) 
 {
-	if( curr >= 0 ) {
-		pqHeapDelete( pq->pHeap, curr );
+	if (curr >= 0)  {
+		pqHeapDelete (pq->pHeap, curr) ;
 		return;
 	}
 	curr = -(curr+1);
-	assert( curr < pq->Max && pq->pKeys[curr] != NULL );
+	assert (curr < pq->Max && pq->pKeys[curr] != NULL) ;
 
 	pq->pKeys[curr] = NULL;
-	while( pq->Size > 0 && *(pq->ppOrder[pq->Size-1]) == NULL ) {
+	while (pq->Size > 0 && *(pq->ppOrder[pq->Size-1]) == NULL)  {
 		-- pq->Size;
 	}
 }

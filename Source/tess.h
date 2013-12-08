@@ -45,7 +45,8 @@ extern "C" {
 
 //typedef struct TESStesselator TESStesselator;
 
-struct TTesselator {
+struct TTesselator 
+{
 
 	/*** state needed for collecting the input data ***/
 	TMesh*  pMesh;		/* stores the input contours, and eventually
@@ -68,7 +69,7 @@ struct TTesselator {
 	TPriorityQ* pq;		/* priority queue of vertex events */
 	TVertex* pEvent;		/* current sweep event being processed */
 
-	struct BucketAlloc* pRegionPool;
+	TBucketAlloc* pRegionPool;
 
 	int nVertexIndexCounter;
 	
