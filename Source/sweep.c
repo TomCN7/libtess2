@@ -107,21 +107,21 @@ static int EdgeLeq (TTesselator *tess, ActiveRegion *reg1, ActiveRegion *reg2)
 */
 {
 	TVertex *event = tess->pEvent;
-	THalfEdge *e1, *e2;
+	THalfEdge *e1 = NULL, *e2 = NULL;
 	float t1, t2;
 
 	e1 = reg1->eUp;
 	e2 = reg2->eUp;
 
 	if (e1->Dst == event)  
-    {
+	{
 		if (e2->Dst == event)  
-        {
+        	{
 			/* Two edges right of the sweep line which meet at the sweep event.
 			* Sort them by slope.
 			*/
 			if (VertLeq (e1->pOrigin, e2->pOrigin) ) 
-            {
+            		{
 				return EdgeSign (e2->Dst, e1->pOrigin, e2->pOrigin)  <= 0;
 			}
 			return EdgeSign (e1->Dst, e2->pOrigin, e1->pOrigin)  >= 0;
@@ -129,7 +129,7 @@ static int EdgeLeq (TTesselator *tess, ActiveRegion *reg1, ActiveRegion *reg2)
 		return EdgeSign (e2->Dst, event, e2->pOrigin)  <= 0;
 	}
 	if (e2->Dst == event)  
-    {
+ 	{
 		return EdgeSign (e1->Dst, event, e1->pOrigin)  >= 0;
 	}
 
@@ -143,7 +143,7 @@ static int EdgeLeq (TTesselator *tess, ActiveRegion *reg1, ActiveRegion *reg2)
 static void DeleteRegion (TTesselator *pTess, ActiveRegion *pRegion) 
 {
 	if (pRegion->fixUpperEdge) 
-    {
+	{
 		/* It was created with zero winding number, so it better be
 		* deleted with zero winding number (ie. it better not get merged
 		* with a real edge).
@@ -154,7 +154,6 @@ static void DeleteRegion (TTesselator *pTess, ActiveRegion *pRegion)
 	dictDelete(pTess->pDict, pRegion->nodeUp);
 	BucketFree(pTess->pRegionPool, pRegion);
 }
-
 
 static int FixUpperEdge(TTesselator *pTess, ActiveRegion *pRegion, THalfEdge *pNewEdge)
 /*
@@ -177,7 +176,7 @@ static ActiveRegion *TopLeftRegion(TTesselator *pTess, ActiveRegion *pRegion)
 
 	/* Find the region above the uppermost edge with the same origin */
 	do 
-    {
+	{
 		pRegion = RegionAbove(pRegion);
 	} while (pRegion->eUp->pOrigin == pOrigion);
 
@@ -185,7 +184,7 @@ static ActiveRegion *TopLeftRegion(TTesselator *pTess, ActiveRegion *pRegion)
 	* now is the time to fix it.
 	*/
 	if (pRegion->fixUpperEdge) 
-    {
+    	{
 		pEdge = tessMeshConnect(pTess->pMesh, RegionBelow(pRegion)->eUp->Sym, pRegion->eUp->Lnext) ;
 		if (pEdge == NULL) return NULL;
 		if (!FixUpperEdge(pTess, pRegion, pEdge)) return NULL;
@@ -200,7 +199,7 @@ static ActiveRegion *TopRightRegion(ActiveRegion *pRegion)
 
 	/* Find the region above the uppermost edge with the same destination */
 	do 
-    {
+    	{
 		pRegion = RegionAbove (pRegion) ;
 	} while (pRegion->eUp->Dst == pDst);
 
@@ -233,7 +232,7 @@ static ActiveRegion *AddRegionBelow(
 static int IsWindingInside(TTesselator *pTess, int n)
 {
 	switch (pTess->nWindingRule) 
-    {
+    	{
 		case TESS_WINDING_ODD:
 			return (n & 1);
 		case TESS_WINDING_NONZERO:
@@ -299,14 +298,14 @@ static THalfEdge *FinishLeftRegions(
 	regPrev = pRegFirst;
 	ePrev = pRegFirst->eUp;
 	while (regPrev != pRegLast) 
-    {
+    	{
 		regPrev->fixUpperEdge = FALSE;	/* placement was OK */
 		reg = RegionBelow(regPrev);
 		e = reg->eUp;
 		if (e->pOrigin != ePrev->pOrigin) 
-        {
+        	{
 			if (!reg->fixUpperEdge)
-            {
+            		{
 				/* Remove the last left-going edge.  Even though there are no further
 				* edges in the dictionary with this origin, there may be further
 				* such edges in the mesh (if we are adding left edges to a vertex
@@ -326,7 +325,7 @@ static THalfEdge *FinishLeftRegions(
 
 		/* Relink edges so that ePrev->Onext == e */
 		if (ePrev->Onext != e)
-        {
+        	{
 			if (!tessMeshSplice(pTess->pMesh, e->Oprev, e)) longjmp(pTess->env,1);
 			if (!tessMeshSplice(pTess->pMesh, ePrev, e)) longjmp(pTess->env,1);
 		}
@@ -359,7 +358,7 @@ static void AddRightEdges (
 	/* Insert the new right-going edges in the dictionary */
 	e = eFirst;
 	do 
-    {
+    	{
 		assert (VertLeq (e->pOrigin, e->Dst) );
 		AddRegionBelow (tess, regUp, e->Sym) ;
 		e = e->Onext;
@@ -370,19 +369,19 @@ static void AddRightEdges (
 	* edges to match the dictionary ordering (if necessary).
 	*/
 	if (eTopLeft == NULL)  
-    {
+    	{
 		eTopLeft = RegionBelow (regUp) ->eUp->Rprev;
 	}
 	regPrev = regUp;
 	ePrev = eTopLeft;
 	for (;;)  
-    {
+    	{
 		reg = RegionBelow (regPrev) ;
 		e = reg->eUp->Sym;
 		if (e->pOrigin != ePrev->pOrigin)  break;
 
 		if (e->Onext != ePrev)  
-        {
+        	{
 			/* Unlink e from its current position, and relink below ePrev */
 			if  (!tessMeshSplice (tess->pMesh, e->Oprev, e) )  longjmp(tess->env,1);
 			if  (!tessMeshSplice (tess->pMesh, ePrev->Oprev, e) )  longjmp(tess->env,1);
@@ -396,7 +395,7 @@ static void AddRightEdges (
 		*/
 		regPrev->dirty = TRUE;
 		if (! firstTime && CheckForRightSplice (tess, regPrev) ) 
-        {
+        	{
 			AddWinding (e, ePrev) ;
 			DeleteRegion (tess, regPrev) ;
 			if  (!tessMeshDelete (tess->pMesh, ePrev) )  longjmp(tess->env,1);
@@ -408,7 +407,8 @@ static void AddRightEdges (
 	regPrev->dirty = TRUE;
 	assert (regPrev->windingNumber - e->nWinding == reg->windingNumber) ;
 
-	if (cleanUp)  {
+	if (cleanUp)  
+	{
 		/* Check for intersections between newly adjacent edges. */
 		WalkDirtyRegions (tess, regPrev) ;
 	}
@@ -447,8 +447,7 @@ static void VertexWeights (
 
 
 static void GetIntersectData (TTesselator *pTess, TVertex *isect,
-							 TVertex *orgUp, TVertex *dstUp,
-							 TVertex *orgLo, TVertex *dstLo) 
+	TVertex *orgUp, TVertex *dstUp, TVertex *orgLo, TVertex *dstLo) 
  /*
  * We've computed a new intersection point, now we need a "data" pointer
  * from the user so that we can refer to this new vertex in the
@@ -495,27 +494,27 @@ static int CheckForRightSplice(TTesselator *pTess, ActiveRegion *pRegUp)
 	THalfEdge *pEdgeLo = pRegLo->eUp;
 
 	if (VertLeq (pEdgeUp->pOrigin, pEdgeLo->pOrigin) )
-    {
+    	{
 		if (EdgeSign (pEdgeLo->Dst, pEdgeUp->pOrigin, pEdgeLo->pOrigin)  > 0)  return FALSE;
 
 		/* eUp->Org appears to be below eLo */
 		if (! VertEq (pEdgeUp->pOrigin, pEdgeLo->pOrigin) )
-        {
+        	{
 			/* Splice eUp->Org into eLo */
 			if  (tessMeshSplitEdge (pTess->pMesh, pEdgeLo->Sym)  == NULL) longjmp(pTess->env,1);
 			if  (!tessMeshSplice (pTess->pMesh, pEdgeUp, pEdgeLo->Oprev) )  longjmp(pTess->env,1);
 			pRegUp->dirty = pRegLo->dirty = TRUE;
 
 		} 
-        else if (pEdgeUp->pOrigin != pEdgeLo->pOrigin) 
-        {
+        	else if (pEdgeUp->pOrigin != pEdgeLo->pOrigin) 
+        	{
 			/* merge the two vertices, discarding eUp->Org */
 			pqDelete (pTess->pq, pEdgeUp->pOrigin->pqHandle) ;
 			SpliceMergeVertices (pTess, pEdgeLo->Oprev, pEdgeUp) ;
 		}
 	} 
-    else 
-    {
+    	else 
+    	{
 		if (EdgeSign (pEdgeUp->Dst, pEdgeLo->pOrigin, pEdgeUp->pOrigin)  < 0)  return FALSE;
 
 		/* eLo->Org appears to be above eUp, so splice eLo->Org into eUp */
@@ -554,7 +553,7 @@ static int CheckForLeftSplice(TTesselator *pTess, ActiveRegion *pRegUp)
 	assert(!VertEq(pEdgeUp->Dst, pEdgeLo->Dst));
 
 	if (VertLeq(pEdgeUp->Dst, pEdgeLo->Dst)) 
-    {
+    	{
 		if (EdgeSign(pEdgeUp->Dst, pEdgeLo->Dst, pEdgeUp->pOrigin) < 0) return FALSE;
 
 		/* eLo->Dst is above eUp, so splice eLo->Dst into eUp */
@@ -564,8 +563,8 @@ static int CheckForLeftSplice(TTesselator *pTess, ActiveRegion *pRegUp)
 		if (!tessMeshSplice(pTess->pMesh, pEdgeLo->Sym, pEdge)) longjmp(pTess->env,1);
 		pEdge->Lface->bInside = pRegUp->inside;
 	} 
-    else 
-    {
+    	else 
+    	{
 		if (EdgeSign(pEdgeLo->Dst, pEdgeUp->Dst, pEdgeLo->pOrigin) > 0)  return FALSE;
 
 		/* eUp->Dst is below eLo, so splice eUp->Dst into eLo */
@@ -614,11 +613,11 @@ static int CheckForIntersect(TTesselator *pTess, ActiveRegion *pRegUp)
 	if (tMinUp > tMaxLo) return FALSE;	/* t ranges do not overlap */
 
 	if (VertLeq(pOrgUp, pOrgLo)) 
-    {
+    	{
 		if (EdgeSign(pDstLo, pOrgUp, pOrgLo) > 0) return FALSE;
 	}
-    else 
-    {
+    	else 
+    	{
 		if (EdgeSign(pDstUp, pOrgLo, pOrgUp) < 0)  return FALSE;
 	}
 
@@ -633,7 +632,7 @@ static int CheckForIntersect(TTesselator *pTess, ActiveRegion *pRegUp)
 	assert(isect.s <= MAX(pOrgLo->s, pOrgUp->s));
 
 	if (VertLeq(&isect, pTess->pEvent)) 
-    {
+     	{
 		/* The intersection point lies slightly to the left of the sweep line,
 		* so move it until it''s slightly to the right of the sweep line.
 		* (If we had perfect numerical precision, this would never happen
@@ -651,13 +650,13 @@ static int CheckForIntersect(TTesselator *pTess, ActiveRegion *pRegUp)
 	*/
 	pOrgMin = VertLeq(pOrgUp, pOrgLo) ? pOrgUp : pOrgLo;
 	if (VertLeq(pOrgMin, &isect)) 
-    {
+    	{
 		isect.s = pOrgMin->s;
 		isect.t = pOrgMin->t;
 	}
 
 	if (VertEq(&isect, pOrgUp) || VertEq(&isect, pOrgLo)) 
-    {
+    	{
 		/* Easy case -- intersection at one of the right endpoints */
 		(void) CheckForRightSplice(pTess, pRegUp);
 		return FALSE;
@@ -673,7 +672,7 @@ static int CheckForIntersect(TTesselator *pTess, ActiveRegion *pRegUp)
 		* due to very small numerical errors in the intersection calculation.
 		*/
 		if (pDstLo == pTess->pEvent) 
-        {
+        	{
 			/* Splice dstLo into eUp, and process the new region(s) */
 			if (tessMeshSplitEdge(pTess->pMesh, pEdgeUp->Sym) == NULL) longjmp(pTess->env,1);
 			if (!tessMeshSplice(pTess->pMesh, pEdgeLo->Sym, pEdgeUp)) longjmp(pTess->env,1);
@@ -685,7 +684,7 @@ static int CheckForIntersect(TTesselator *pTess, ActiveRegion *pRegUp)
 			return TRUE;
 		}
 		if (pDstUp == pTess->pEvent) 
-        {
+        	{
 			/* Splice dstUp into eLo, and process the new region(s) */
 			if (tessMeshSplitEdge(pTess->pMesh, pEdgeLo->Sym) == NULL) longjmp(pTess->env,1);
 			if (!tessMeshSplice(pTess->pMesh, pEdgeUp->Lnext, pEdgeLo->Oprev)) longjmp(pTess->env,1); 
@@ -702,14 +701,14 @@ static int CheckForIntersect(TTesselator *pTess, ActiveRegion *pRegUp)
 		* (and wait for ConnectRightVertex to splice it appropriately).
 		*/
 		if (EdgeSign(pDstUp, pTess->pEvent, &isect) >= 0) 
-        {
+        	{
 			RegionAbove(pRegUp)->dirty = pRegUp->dirty = TRUE;
 			if (tessMeshSplitEdge(pTess->pMesh, pEdgeUp->Sym) == NULL) longjmp(pTess->env,1);
 			pEdgeUp->pOrigin->s = pTess->pEvent->s;
 			pEdgeUp->pOrigin->t = pTess->pEvent->t;
 		}
 		if (EdgeSign(pDstLo, pTess->pEvent, &isect) <= 0) 
-        {
+        	{
 			pRegUp->dirty = pRegLo->dirty = TRUE;
 			if (tessMeshSplitEdge(pTess->pMesh, pEdgeLo->Sym) == NULL) longjmp(pTess->env,1);
 			pEdgeLo->pOrigin->s = pTess->pEvent->s;
@@ -734,7 +733,7 @@ static int CheckForIntersect(TTesselator *pTess, ActiveRegion *pRegUp)
 	pEdgeUp->pOrigin->t = isect.t;
 	pEdgeUp->pOrigin->pqHandle = pqInsert(&pTess->Alloc, pTess->pq, pEdgeUp->pOrigin);
 	if (pEdgeUp->pOrigin->pqHandle == INV_HANDLE) 
-    {
+    	{
 		pqDeletePriorityQ(&pTess->Alloc, pTess->pq);
 		pTess->pq = NULL;
 		longjmp(pTess->env,1);
@@ -758,19 +757,19 @@ static void WalkDirtyRegions(TTesselator *pTess, ActiveRegion *pRegUp)
 	THalfEdge *pEdgeUp, *pEdgeLo;
 
 	for (;;)  
-    {
+    	{
 		/* Find the lowest dirty region (we walk from the bottom up). */
 		while (pRegLo->dirty) 
-        {
+        	{
 			pRegUp = pRegLo;
 			pRegLo = RegionBelow(pRegLo);
 		}
 		if (!pRegUp->dirty) 
-        {
+        	{
 			pRegLo = pRegUp;
 			pRegUp = RegionAbove(pRegUp);
 			if (pRegUp == NULL || ! pRegUp->dirty)
-            {
+            		{
 				/* We've walked all the dirty regions */
 				return;
 			}
@@ -780,24 +779,24 @@ static void WalkDirtyRegions(TTesselator *pTess, ActiveRegion *pRegUp)
 		pEdgeLo = pRegLo->eUp;
 
 		if (pEdgeUp->Dst != pEdgeLo->Dst) 
-        {
+        	{
 			/* Check that the edge ordering is obeyed at the Dst vertices. */
 			if (CheckForLeftSplice(pTess, pRegUp)) 
-            {
+            		{
 
 				/* If the upper or lower edge was marked fixUpperEdge, then
 				* we no longer need it (since these edges are needed only for
 				* vertices which otherwise have no right-going edges).
 				*/
 				if (pRegLo->fixUpperEdge) 
-                {
+                		{
 					DeleteRegion(pTess, pRegLo);
 					if (!tessMeshDelete(pTess->pMesh, pEdgeLo)) longjmp(pTess->env,1);
 					pRegLo = RegionBelow(pRegUp);
 					pEdgeLo = pRegLo->eUp;
 				} 
-                else if (pRegUp->fixUpperEdge) 
-                {
+                		else if (pRegUp->fixUpperEdge) 
+                		{
 					DeleteRegion(pTess, pRegUp);
 					if (!tessMeshDelete(pTess->pMesh, pEdgeUp)) longjmp(pTess->env,1);
 					pRegUp = RegionAbove(pRegLo);
@@ -806,7 +805,7 @@ static void WalkDirtyRegions(TTesselator *pTess, ActiveRegion *pRegUp)
 			}
 		}
 		if (pEdgeUp->pOrigin != pEdgeLo->pOrigin) 
-        {
+        	{
 			if (pEdgeUp->Dst != pEdgeLo->Dst
 				&& ! pRegUp->fixUpperEdge && ! pRegLo->fixUpperEdge
 				&& (pEdgeUp->Dst == pTess->pEvent || pEdgeLo->Dst == pTess->pEvent)) 
@@ -820,13 +819,13 @@ static void WalkDirtyRegions(TTesselator *pTess, ActiveRegion *pRegUp)
 				* edge from their associated vertex).
 				*/
 				if (CheckForIntersect(pTess, pRegUp)) 
-                {
+                		{
 					/* WalkDirtyRegions() was called recursively; we're done */
 					return;
 				}
 			} 
-            else 
-            {
+            		else 
+            		{
 				/* Even though we can't use CheckForIntersect(), the Org vertices
 				* may violate the dictionary edge ordering.  Check and correct this.
 				*/
@@ -834,7 +833,7 @@ static void WalkDirtyRegions(TTesselator *pTess, ActiveRegion *pRegUp)
 			}
 		}
 		if (pEdgeUp->pOrigin == pEdgeLo->pOrigin && pEdgeUp->Dst == pEdgeLo->Dst) 
-        {
+        	{
 			/* A degenerate loop consisting of only two edges -- delete it. */
 			AddWinding(pEdgeLo, pEdgeUp);
 			DeleteRegion(pTess, pRegUp);
@@ -887,7 +886,7 @@ static void ConnectRightVertex (
 	int bDegenerate = FALSE;
 
 	if (pEdgeUp->Dst != pEdgeLo->Dst) 
-    {
+    	{
 		(void) CheckForIntersect(pTess, pRegUp);
 	}
 
@@ -895,7 +894,7 @@ static void ConnectRightVertex (
 	* through vEvent, or may coincide with new intersection vertex
 	*/
 	if (VertEq(pEdgeUp->pOrigin, pTess->pEvent)) 
-    {
+    	{
 		if (!tessMeshSplice(pTess->pMesh, pEdgeTopLeft->Oprev, pEdgeUp)) longjmp(pTess->env,1);
 		pRegUp = TopLeftRegion(pTess, pRegUp);
 		if (pRegUp == NULL) longjmp(pTess->env,1);
@@ -904,13 +903,13 @@ static void ConnectRightVertex (
 		bDegenerate = TRUE;
 	}
 	if (VertEq(pEdgeLo->pOrigin, pTess->pEvent)) 
-    {
+    	{
 		if (!tessMeshSplice(pTess->pMesh, pEdgeBottomLeft, pEdgeLo->Oprev)) longjmp(pTess->env,1);
 		pEdgeBottomLeft = FinishLeftRegions(pTess, pRegLo, NULL);
 		bDegenerate = TRUE;
 	}
 	if (bDegenerate) 
-    {
+    	{
 		AddRightEdges(pTess, pRegUp, pEdgeBottomLeft->Onext, pEdgeTopLeft, pEdgeTopLeft, TRUE);
 		return;
 	}
@@ -919,11 +918,11 @@ static void ConnectRightVertex (
 	* Connect to the closer of eLo->Org, eUp->Org.
 	*/
 	if (VertLeq(pEdgeLo->pOrigin, pEdgeUp->pOrigin)) 
-    {
+    	{
 		pEdgeNew = pEdgeLo->Oprev;
 	} 
-    else 
-    {
+    	else 
+    	{
 		pEdgeNew = pEdgeUp;
 	}
 	pEdgeNew = tessMeshConnect(pTess->pMesh, pEdgeBottomLeft->Lprev, pEdgeNew);
@@ -959,7 +958,7 @@ static void ConnectLeftDegenerate (
 
 	pEdge = pRegUp->eUp;
 	if (VertEq(pEdge->pOrigin, pVEvent)) 
-    {
+    	{
 		/* e->Org is an unprocessed vertex - just combine them, and wait
 		* for e->Org to be pulled from the queue
 		*/
@@ -969,11 +968,11 @@ static void ConnectLeftDegenerate (
 	}
 
 	if (!VertEq (pEdge->Dst, pVEvent)) 
-    {
+    	{
 		/* General case -- splice vEvent into edge e which passes through it */
 		if (tessMeshSplitEdge(pTess->pMesh, pEdge->Sym) == NULL) longjmp(pTess->env,1);
 		if (pRegUp->fixUpperEdge) 
-        {
+        	{
 			/* This edge was fixable -- delete unused portion of original edge */
 			if (!tessMeshDelete(pTess->pMesh, pEdge->Onext)) longjmp(pTess->env,1);
 			pRegUp->fixUpperEdge = FALSE;
@@ -992,7 +991,7 @@ static void ConnectLeftDegenerate (
 	pEdgeTopRight = pRegion->eUp->Sym;
 	pEdgeTopLeft = pEdgeLast = pEdgeTopRight->Onext;
 	if (pRegion->fixUpperEdge) 
-    {
+    	{
 		/* Here e->Dst has only a single fixable edge going right.
 		* We can delete it since now we have some real right-going edges.
 		*/
@@ -1003,7 +1002,7 @@ static void ConnectLeftDegenerate (
 	}
 	if (!tessMeshSplice(pTess->pMesh, pVEvent->pHalfEdge, pEdgeTopRight)) longjmp(pTess->env,1);
 	if (!EdgeGoesLeft(pEdgeTopLeft)) 
-    {
+    	{
 		/* e->Dst had no left-going edges -- indicate this to AddRightEdges() */
 		pEdgeTopLeft = NULL;
 	}
@@ -1040,7 +1039,7 @@ static void ConnectLeftVertex(TTesselator *pTess, TVertex *pVEvent)
 	pRegUp = (ActiveRegion *)dictKey(dictSearch(pTess->pDict, &tmp));
 	pRegLo = RegionBelow(pRegUp);
 	if (!pRegLo) 
-    {
+    	{
 		// This may happen if the input polygon is coplanar.
 		return;
 	}
@@ -1049,7 +1048,7 @@ static void ConnectLeftVertex(TTesselator *pTess, TVertex *pVEvent)
 
 	/* Try merging with U or L first */
 	if (EdgeSign(pEdgeUp->Dst, pVEvent, pEdgeUp->pOrigin) == 0) 
-    {
+    	{
 		ConnectLeftDegenerate(pTess, pRegUp, pVEvent);
 		return;
 	}
@@ -1060,31 +1059,31 @@ static void ConnectLeftVertex(TTesselator *pTess, TVertex *pVEvent)
 	pReg = VertLeq(pEdgeLo->Dst, pEdgeUp->Dst) ? pRegUp : pRegLo;
 
 	if (pRegUp->inside || pReg->fixUpperEdge) 
-    {
+    	{
 		if (pReg == pRegUp) 
-        {
+        	{
 			pEdgeNew = tessMeshConnect(pTess->pMesh, pVEvent->pHalfEdge->Sym, pEdgeUp->Lnext);
 			if (pEdgeNew == NULL) longjmp(pTess->env,1);
 		} 
-        else 
-        {
+        	else 
+        	{
 			THalfEdge *tempHalfEdge= tessMeshConnect(pTess->pMesh, pEdgeLo->Dnext, pVEvent->pHalfEdge);
 			if (tempHalfEdge == NULL) longjmp(pTess->env,1);
 
 			pEdgeNew = tempHalfEdge->Sym;
 		}
 		if (pReg->fixUpperEdge) 
-        {
+        	{
 			if (!FixUpperEdge(pTess, pReg, pEdgeNew)) longjmp(pTess->env,1);
 		} 
-        else 
-        {
+        	else 
+        	{
 			ComputeWinding(pTess, AddRegionBelow(pTess, pRegUp, pEdgeNew));
 		}
 		SweepEvent(pTess, pVEvent);
 	} 
-    else 
-    {
+    	else 
+    	{
 		/* The new vertex is in a region which does not belong to the polygon.
 		* We don''t need to connect this vertex to the rest of the mesh.
 		*/
@@ -1111,10 +1110,10 @@ static void SweepEvent(TTesselator *pTess, TVertex *pVEvent)
 	*/
 	pEdge = pVEvent->pHalfEdge;
 	while (pEdge->pActiveRegion == NULL) 
-    {
+    	{
 		pEdge = pEdge->Onext;
 		if (pEdge == pVEvent->pHalfEdge)
-        {
+        	{
 			/* All edges go right -- not incident to any processed edges */
 			ConnectLeftVertex(pTess, pVEvent);
 			return;
@@ -1144,8 +1143,8 @@ static void SweepEvent(TTesselator *pTess, TVertex *pVEvent)
 		/* No right-going edges -- add a temporary "fixable" edge */
 		ConnectRightVertex(pTess, pRegUp, pEdgeBottomLeft);
 	} 
-    else 
-    {
+    	else 
+    	{
 		AddRightEdges(pTess, pRegUp, pEdgeBottomLeft->Onext, pEdgeTopLeft, pEdgeTopLeft, TRUE);
 	}
 }
@@ -1216,14 +1215,14 @@ static void DoneEdgeDict(TTesselator *pTess)
 	int nFixedEdges = 0;
 
 	while ((pRegion = (ActiveRegion *)dictKey (dictMin (pTess->pDict) )) != NULL) 
-    {
+    	{
 		/*
 		* At the end of all processing, the dictionary should contain
 		* only the two sentinel edges, plus at most one "fixable" edge
 		* created by ConnectRightVertex().
 		*/
 		if (!pRegion->sentinel) 
-        {
+        	{
 			assert(pRegion->fixUpperEdge);
 			assert(++nFixedEdges == 1);
 		}
@@ -1245,12 +1244,12 @@ static void RemoveDegenerateEdges(TTesselator *pTess)
 
 	/*LINTED*/
 	for (pEdge = pEdgeHead->pNext; pEdge != pEdgeHead; pEdge = pEdgeNext) 
-    {
+    	{
 		pEdgeNext = pEdge->pNext;
 		eLnext = pEdge->Lnext;
 
 		if (VertEq(pEdge->pOrigin, pEdge->Dst) && pEdge->Lnext->Lnext != pEdge) 
-        {
+        	{
 			/* Zero-length edge, contour has at least 3 edges */
 
 			SpliceMergeVertices(pTess, eLnext, pEdge);	/* deletes e->Org */
@@ -1259,11 +1258,11 @@ static void RemoveDegenerateEdges(TTesselator *pTess)
 			eLnext = pEdge->Lnext;
 		}
 		if (eLnext->Lnext == pEdge) 
-        {
+        	{
 			/* Degenerate contour (one or two edges) */
 
 			if (eLnext != pEdge) 
-            {
+            		{
 				if (eLnext == pEdgeNext || eLnext == pEdgeNext->Sym) { pEdgeNext = pEdgeNext->pNext; }
 				if (!tessMeshDelete(pTess->pMesh, eLnext)) longjmp(pTess->env,1);
 			}
@@ -1285,7 +1284,7 @@ static int InitPriorityQ(TTesselator *pTess)
 	
 	pVertexHead = &pTess->pMesh->vHead;
 	for (pVertex = pVertexHead->pNext; pVertex != pVertexHead; pVertex = pVertex->pNext) 
-    {
+    	{
 		nVertexCount++;
 	}
 	/* Make sure there is enough space for sentinels. */
@@ -1296,13 +1295,13 @@ static int InitPriorityQ(TTesselator *pTess)
 
 	pVertexHead = &pTess->pMesh->vHead;
 	for (pVertex = pVertexHead->pNext; pVertex != pVertexHead; pVertex = pVertex->pNext)
-    {
+    	{
 		pVertex->pqHandle = pqInsert(&pTess->Alloc, pq, pVertex);
 		if (pVertex->pqHandle == INV_HANDLE)
 			break;
 	}
 	if (pVertex != pVertexHead || !pqInit(&pTess->Alloc, pq)) 
-    {
+    	{
 		pqDeletePriorityQ(&pTess->Alloc, pTess->pq);
 		pTess->pq = NULL;
 		return 0;
@@ -1338,13 +1337,13 @@ static int RemoveDegenerateFaces(TTesselator *pTess, TMesh *pMesh)
 
 	/*LINTED*/
 	for (pFace = pMesh->fHead.pNext; pFace != &pMesh->fHead; pFace = pFaceNext) 
-    {
+    	{
 		pFaceNext = pFace->pNext;
 		fEdge = pFace->pHalfEdge;
 		assert(fEdge->Lnext != fEdge);
 
 		if (fEdge->Lnext->Lnext == fEdge) 
-        {
+        	{
 			/* A face with only two edges */
 			AddWinding(fEdge->Onext, fEdge);
 			if (!tessMeshDelete(pTess->pMesh, fEdge)) return 0;
@@ -1375,9 +1374,9 @@ int tessComputeInterior(TTesselator *pTess)
 	InitEdgeDict(pTess);
 
 	while ((pVertex = (TVertex *)pqExtractMin(pTess->pq)) != NULL) 
-    {
+    	{
 		for (;;)
-        {
+        	{
 			pVertexNext = (TVertex *)pqMinimum(pTess->pq);
 			if (pVertexNext == NULL || !VertEq(pVertexNext, pVertex)) break;
 
