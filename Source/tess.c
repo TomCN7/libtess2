@@ -210,43 +210,43 @@ extern int RandomSweep;
 void tessProjectPolygon(TTesselator *pTess)
 {
 	TVertex *v, *vHead = &pTess->pMesh->vHead;
-	float norm[3];
+	float fNorm[3];
 	float *sUnit, *tUnit;
 	int i, first, computedNormal = FALSE;
 
-	norm[0] = pTess->fNormal[0];
-	norm[1] = pTess->fNormal[1];
-	norm[2] = pTess->fNormal[2];
-	if (norm[0] == 0 && norm[1] == 0 && norm[2] == 0) 
+	fNorm[0] = pTess->fNormal[0];
+	fNorm[1] = pTess->fNormal[1];
+	fNorm[2] = pTess->fNormal[2];
+	if (fNorm[0] == 0 && fNorm[1] == 0 && fNorm[2] == 0) 
     {
-		ComputeNormal(pTess, norm);
+		ComputeNormal(pTess, fNorm);
 		computedNormal = TRUE;
 	}
 	sUnit = pTess->fsUnit;
 	tUnit = pTess->ftUnit;
-	i = LongAxis(norm);
+	i = LongAxis(fNorm);
 
 #if defined(FOR_TRITE_TEST_PROGRAM) || defined(TRUE_PROJECT)
 	/* Choose the initial sUnit vector to be approximately perpendicular
 	* to the normal.
 	*/
-	Normalize(norm);
+	Normalize(fNorm);
 
 	sUnit[i] = 0;
 	sUnit[(i+1)%3] = S_UNIT_X;
 	sUnit[(i+2)%3] = S_UNIT_Y;
 
 	/* Now make it exactly perpendicular */
-	w = Dot (sUnit, norm) ;
-	sUnit[0] -= w * norm[0];
-	sUnit[1] -= w * norm[1];
-	sUnit[2] -= w * norm[2];
+	w = Dot (sUnit, fNorm) ;
+	sUnit[0] -= w * fNorm[0];
+	sUnit[1] -= w * fNorm[1];
+	sUnit[2] -= w * fNorm[2];
 	Normalize (sUnit) ;
 
 	/* Choose tUnit so that (sUnit,tUnit,norm) form a right-handed frame */
-	tUnit[0] = norm[1]*sUnit[2] - norm[2]*sUnit[1];
-	tUnit[1] = norm[2]*sUnit[0] - norm[0]*sUnit[2];
-	tUnit[2] = norm[0]*sUnit[1] - norm[1]*sUnit[0];
+	tUnit[0] = fNorm[1]*sUnit[2] - fNorm[2]*sUnit[1];
+	tUnit[1] = fNorm[2]*sUnit[0] - fNorm[0]*sUnit[2];
+	tUnit[2] = fNorm[0]*sUnit[1] - fNorm[1]*sUnit[0];
 	Normalize (tUnit) ;
 #else
 	/* Project perpendicular to a coordinate axis -- better numerically */
@@ -255,19 +255,19 @@ void tessProjectPolygon(TTesselator *pTess)
 	sUnit[(i+2)%3] = S_UNIT_Y;
 
 	tUnit[i] = 0;
-	tUnit[(i+1)%3] = (norm[i] > 0) ? -S_UNIT_Y : S_UNIT_Y;
-	tUnit[(i+2)%3] = (norm[i] > 0) ? S_UNIT_X : -S_UNIT_X;
+	tUnit[(i+1)%3] = (fNorm[i] > 0) ? -S_UNIT_Y : S_UNIT_Y;
+	tUnit[(i+2)%3] = (fNorm[i] > 0) ? S_UNIT_X : -S_UNIT_X;
 #endif
 
 	/* Project the vertices onto the sweep plane */
 	for (v = vHead->pNext; v != vHead; v = v->pNext)
 	{
-		v->s = Dot (v->fCoords, sUnit) ;
-		v->t = Dot (v->fCoords, tUnit) ;
+		v->s = Dot(v->fCoords, sUnit);
+		v->t = Dot(v->fCoords, tUnit);
 	}
 	if (computedNormal) 
     {
-		CheckOrientation (pTess) ;
+		CheckOrientation(pTess);
 	}
 
 	/* Compute ST bounds. */
@@ -537,7 +537,7 @@ TTesselator* tessNewTess(TAlloc* pAlloc)
 	if (pTess->Alloc.nRegionBucketSize > 4096)
 		pTess->Alloc.nRegionBucketSize = 4096;
 	pTess->pRegionPool = CreateBucketAlloc (
-        &pTess->Alloc, "Regions", sizeof(ActiveRegion), pTess->Alloc.nRegionBucketSize);
+        &pTess->Alloc, "Regions", sizeof(TActiveRegion), pTess->Alloc.nRegionBucketSize);
 
 	// Initialize to begin polygon.
 	pTess->pMesh = NULL;
@@ -555,8 +555,7 @@ TTesselator* tessNewTess(TAlloc* pAlloc)
 }
 
 void tessDeleteTess(TTesselator *pTess)
-{
-	
+{	
 	struct TAlloc Alloc = pTess->Alloc;
 	
 	DeleteBucketAlloc(pTess->pRegionPool);

@@ -40,7 +40,7 @@
 * to the polygon, according to the rule given by tess->windingRule.
 * Each interior region is guaranteed be monotone.
 */
-int tessComputeInterior (TTesselator *tess) ;
+int tessComputeInterior(TTesselator *pTess);
 
 
 /* The following is here *only* for access by debugging routines */
@@ -53,23 +53,23 @@ int tessComputeInterior (TTesselator *tess) ;
 * sweep line crosses each vertex, we update the affected regions.
 */
 
-struct ActiveRegion 
+struct TActiveRegion 
 {
-	THalfEdge *eUp;		/* upper edge, directed right to left */
-	TDictNode *nodeUp;	/* dictionary node corresponding to eUp */
-	int windingNumber;	/* used to determine which regions are
-							* inside the polygon */
-	int inside;		/* is this region inside the polygon? */
-	int sentinel;	/* marks fake edges at t = +/-infinity */
-	int dirty;		/* marks regions where the upper or lower
-					* edge has changed, but we haven't checked
-					* whether they intersect yet */
-	int fixUpperEdge;	/* marks temporary edges introduced when
-						* we process a "right vertex" (one without
-						* any edges leaving to the right) */
+    THalfEdge *pEdgeUp;     /* upper edge, directed right to left */
+    TDictNode *pNodeUp;     /* dictionary node corresponding to eUp */
+    int nWindingNumber;     /* used to determine which regions are
+                            * inside the polygon */
+    int bInside;    /* is this region inside the polygon? */
+    int bSentinel;  /* marks fake edges at t = +/-infinity */
+    int bDirty;     /* marks regions where the upper or lower
+                    * edge has changed, but we haven't checked
+                    * whether they intersect yet */
+    int bFixUpperEdge;  /* marks temporary edges introduced when
+                        * we process a "right vertex" (one without
+                        * any edges leaving to the right) */
 };
 
-#define RegionBelow(r) ((ActiveRegion *) dictKey(dictPred((r)->nodeUp)))
-#define RegionAbove(r) ((ActiveRegion *) dictKey(dictSucc((r)->nodeUp)))
+#define RegionBelow(r) ((TActiveRegion *) dictKey(dictPred((r)->pNodeUp)))
+#define RegionAbove(r) ((TActiveRegion *) dictKey(dictSucc((r)->pNodeUp)))
 
 #endif

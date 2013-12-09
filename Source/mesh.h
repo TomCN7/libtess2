@@ -38,7 +38,7 @@ typedef struct TMesh TMesh;
 typedef struct TVertex TVertex;
 typedef struct TFace TFace;
 typedef struct THalfEdge THalfEdge;
-typedef struct ActiveRegion ActiveRegion;
+typedef struct TActiveRegion TActiveRegion;
 
 /* The mesh structure is similar in spirit, notation, and operations
 * to the "quad-edge" structure (see L. Guibas and J. Stolfi, Primitives
@@ -143,7 +143,7 @@ struct THalfEdge
 	TFace *Lface;         /* left face */
 
 	/* Internal data (keep hidden) */
-	ActiveRegion *pActiveRegion;  /* a region with this upper edge (sweep.c) */
+	TActiveRegion *pActiveRegion;  /* a region with this upper edge (sweep.c) */
 	int nWinding;    /* change in winding number when crossing
 						  from the right face to the left face */
 };

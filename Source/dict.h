@@ -36,38 +36,41 @@ typedef void *TDictKey;
 typedef struct TDict TDict;
 typedef struct TDictNode TDictNode;
 
-TDict *dictNewDict (TAlloc* alloc, void *frame, int (*leq)(void *frame, TDictKey key1, TDictKey key2)) ;
+typedef int (*LEQ)(void *pFrame, TDictKey Key1, TDictKey Key2);
+TDict *dictNewDict(TAlloc* pAlloc, void *pFrame, LEQ);
 
-void dictDeleteDict (TAlloc* alloc, TDict *dict) ;
+void dictDeleteDict(TAlloc* pAlloc, TDict *pDict);
 
 /* Search returns the node with the smallest key greater than or equal
 * to the given key.  If there is no such key, returns a node whose
 * key is NULL.  Similarly, Succ(Max(d)) has a NULL key, etc.
 */
-TDictNode *dictSearch (TDict *dict, TDictKey key) ;
-TDictNode *dictInsertBefore (TDict *dict, TDictNode *node, TDictKey key) ;
-void dictDelete (TDict *dict, TDictNode *node) ;
+TDictNode *dictSearch(TDict *pDict, TDictKey Key);
+TDictNode *dictInsertBefore(TDict *pDict, TDictNode *pNode, TDictKey Key);
+void dictDelete(TDict *pDict, TDictNode *pNode);
 
-#define dictKey(n)	((n)->Key)
-#define dictSucc(n)	((n)->pNext)
-#define dictPred(n)	((n)->pPrev)
-#define dictMin(d)	((d)->Head.pNext)
-#define dictMax(d)	((d)->Head.pPrev)
+#define dictKey(n)      ((n)->Key)
+#define dictSucc(n)     ((n)->pNext)
+#define dictPred(n)     ((n)->pPrev)
+#define dictMin(d)      ((d)->Head.pNext)
+#define dictMax(d)      ((d)->Head.pPrev)
 #define dictInsert(d,k) (dictInsertBefore((d),&(d)->Head,(k)))
 
 /*** Private data structures ***/
 
-struct TDictNode {
+struct TDictNode 
+{
 	TDictKey    Key;
 	TDictNode*  pNext;
 	TDictNode*  pPrev;
 };
 
-struct TDict {
+struct TDict 
+{
 	TDictNode   Head;
 	void*       pFrame;
 	TBucketAlloc* pNodePool;
-	int (*leq)(void *frame, TDictKey key1, TDictKey key2);
+    LEQ         leq;
 };
 
 #endif

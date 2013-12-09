@@ -67,7 +67,7 @@ struct TTesselator
 
 	TDict*  pDict;		/* edge dictionary for sweep line */
 	TPriorityQ* pq;		/* priority queue of vertex events */
-	TVertex* pEvent;		/* current sweep event being processed */
+	TVertex* pVEvent;		/* current sweep event being processed */
 
 	TBucketAlloc* pRegionPool;
 

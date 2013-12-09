@@ -34,14 +34,14 @@
 #include "mesh.h"
 #include "geom.h"
 
-int tesvertLeq (TVertex *u, TVertex *v) 
+int tessVertLeq (TVertex *u, TVertex *v) 
 {
 	/* Returns TRUE if u is lexicographically <= v. */
 
 	return VertLeq (u, v) ;
 }
 
-float tesedgeEval (TVertex *u, TVertex *v, TVertex *w) 
+float tessEdgeEval (TVertex *u, TVertex *v, TVertex *w) 
 {
 	/* Given three vertices u,v,w such that VertLeq(u,v) && VertLeq(v,w),
 	* evaluates the t-coord of the edge uw at the s-coord of the vertex v.
@@ -71,7 +71,7 @@ float tesedgeEval (TVertex *u, TVertex *v, TVertex *w)
 	return 0;
 }
 
-float tesedgeSign (TVertex *u, TVertex *v, TVertex *w) 
+float tessEdgeSign (TVertex *u, TVertex *v, TVertex *w) 
 {
 	/* Returns a number whose sign matches EdgeEval(u,v,w) but which
 	* is cheaper to evaluate.  Returns > 0, == 0 , or < 0
@@ -96,7 +96,7 @@ float tesedgeSign (TVertex *u, TVertex *v, TVertex *w)
 * Define versions of EdgeSign, EdgeEval with s and t transposed.
 */
 
-float testransEval (TVertex *u, TVertex *v, TVertex *w) 
+float tessTransEval (TVertex *u, TVertex *v, TVertex *w) 
 {
 	/* Given three vertices u,v,w such that TransLeq(u,v) && TransLeq(v,w),
 	* evaluates the t-coord of the edge uw at the s-coord of the vertex v.
@@ -126,7 +126,7 @@ float testransEval (TVertex *u, TVertex *v, TVertex *w)
 	return 0;
 }
 
-float testransSign (TVertex *u, TVertex *v, TVertex *w) 
+float tessTransSign (TVertex *u, TVertex *v, TVertex *w) 
 {
 	/* Returns a number whose sign matches TransEval(u,v,w) but which
 	* is cheaper to evaluate.  Returns > 0, == 0 , or < 0
@@ -147,7 +147,7 @@ float testransSign (TVertex *u, TVertex *v, TVertex *w)
 }
 
 
-int tesvertCCW (TVertex *u, TVertex *v, TVertex *w) 
+int tessVertCCW (TVertex *u, TVertex *v, TVertex *w) 
 {
 	/* For almost-degenerate situations, the results are not reliable.
 	* Unless the floating-point arithmetic can be performed without
@@ -197,7 +197,7 @@ double Interpolate (double a, double x, double b, double y)
 
 #define Swap(a,b)	if (1) { TVertex *t = a; a = b; b = t; } else
 
-void tesedgeIntersect (TVertex *o1, TVertex *d1,
+void tessEdgeIntersect (TVertex *o1, TVertex *d1,
 					  TVertex *o2, TVertex *d2,
 					  TVertex *v) 
 					  /* Given edges (o1,d1) and (o2,d2), compute their point of intersection.
