@@ -36,60 +36,60 @@
 #include "geom.h"
 #include "bucketalloc.h"
 
-#define TRUE 1
-#define FALSE 0
+#define true 1
+#define false 0
 
 /************************ Utility Routines ************************/
 
 /* Allocate and free half-edges in pairs for efficiency.
 * The *only* place that should use this fact is allocation/free.
 */
-typedef struct { THalfEdge e, eSym; } EdgePair;
+typedef struct { THalfEdge Edge, SymEdge; } EdgePair;
 
 /* MakeEdge creates a new pair of half-edges which form their own loop.
 * No vertex or face structures are allocated, but these must be assigned
 * before the current edge operation is completed.
 */
-static THalfEdge *MakeEdge (TMesh* mesh, THalfEdge *eNext) 
+static THalfEdge *MakeEdge(TMesh* pMesh, THalfEdge *pEdgeNext) 
 {
-	THalfEdge *e;
-	THalfEdge *eSym;
-	THalfEdge *ePrev;
-	EdgePair *pair = (EdgePair *)BucketAlloc (mesh->pEdgeBucket) ;
-	if (pair == NULL) return NULL;
+	THalfEdge *pEdge = NULL;
+	THalfEdge *pSymEdge = NULL;
+	THalfEdge *pPrevEdge = NULL;
+	EdgePair *pPair = (EdgePair *)BucketAlloc(pMesh->pEdgeBucket);
+	if (pPair == NULL) return NULL;
 
-	e = &pair->e;
-	eSym = &pair->eSym;
+	pEdge = &pPair->Edge;
+	pSymEdge = &pPair->SymEdge;
 
 	/* Make sure eNext points to the first edge of the edge pair */
-	if (eNext->Sym < eNext)  { eNext = eNext->Sym; }
+	if (pEdgeNext->Sym < pEdgeNext)  { pEdgeNext = pEdgeNext->Sym; }
 
 	/* Insert in circular doubly-linked list before eNext.
 	* Note that the prev pointer is stored in Sym->next.
 	*/
-	ePrev = eNext->Sym->pNext;
-	eSym->pNext = ePrev;
-	ePrev->Sym->pNext = e;
-	e->pNext = eNext;
-	eNext->Sym->pNext = eSym;
+	pPrevEdge = pEdgeNext->Sym->pNext;
+	pSymEdge->pNext = pPrevEdge;
+	pPrevEdge->Sym->pNext = pEdge;
+	pEdge->pNext = pEdgeNext;
+	pEdgeNext->Sym->pNext = pSymEdge;
 
-	e->Sym = eSym;
-	e->Onext = e;
-	e->Lnext = eSym;
-	e->pOrigin = NULL;
-	e->Lface = NULL;
-	e->nWinding = 0;
-	e->pActiveRegion = NULL;
+	pEdge->Sym = pSymEdge;
+	pEdge->Onext = pEdge;
+	pEdge->Lnext = pSymEdge;
+	pEdge->pOrigin = NULL;
+	pEdge->Lface = NULL;
+	pEdge->nWinding = 0;
+	pEdge->pActiveRegion = NULL;
 
-	eSym->Sym = e;
-	eSym->Onext = eSym;
-	eSym->Lnext = e;
-	eSym->pOrigin = NULL;
-	eSym->Lface = NULL;
-	eSym->nWinding = 0;
-	eSym->pActiveRegion = NULL;
+	pSymEdge->Sym = pEdge;
+	pSymEdge->Onext = pSymEdge;
+	pSymEdge->Lnext = pEdge;
+	pSymEdge->pOrigin = NULL;
+	pSymEdge->Lface = NULL;
+	pSymEdge->nWinding = 0;
+	pSymEdge->pActiveRegion = NULL;
 
-	return e;
+	return pEdge;
 }
 
 /* Splice (a, b)  is best described by the Guibas/Stolfi paper or the
@@ -98,15 +98,15 @@ static THalfEdge *MakeEdge (TMesh* mesh, THalfEdge *eNext)
 * depending on whether a and b belong to different face or vertex rings.
 * For more explanation see tessMeshSplice() below.
 */
-static void Splice (THalfEdge *a, THalfEdge *b) 
+static void Splice(THalfEdge *pEdgeA, THalfEdge *pEdgeB) 
 {
-	THalfEdge *aOnext = a->Onext;
-	THalfEdge *bOnext = b->Onext;
+	THalfEdge *pAOnext = pEdgeA->Onext;
+	THalfEdge *pBOnext = pEdgeB->Onext;
 
-	aOnext->Sym->Lnext = b;
-	bOnext->Sym->Lnext = a;
-	a->Onext = bOnext;
-	b->Onext = aOnext;
+	pAOnext->Sym->Lnext = pEdgeB;
+	pBOnext->Sym->Lnext = pEdgeA;
+	pEdgeA->Onext = pBOnext;
+	pEdgeB->Onext = pAOnext;
 }
 
 /* MakeVertex (newVertex, eOrig, vNext)  attaches a new vertex and makes it the
@@ -116,30 +116,30 @@ static void Splice (THalfEdge *a, THalfEdge *b)
 * list will not see the newly created vertices.
 */
 static void MakeVertex (
-    TVertex *newVertex, THalfEdge *eOrig, TVertex *vNext)
+    TVertex *pNewVertex, THalfEdge *pEdgeOrig, TVertex *pNextVertex)
 {
-	THalfEdge *e;
-	TVertex *vPrev;
-	TVertex *vNew = newVertex;
+	THalfEdge *pEdge;
+	TVertex *pPrevVertex;
 
-	assert(vNew != NULL);
+	assert(pNewVertex != NULL);
 
 	/* insert in circular doubly-linked list before vNext */
-	vPrev = vNext->pPrev;
-	vNew->pPrev = vPrev;
-	vPrev->pNext = vNew;
-	vNew->pNext = vNext;
-	vNext->pPrev = vNew;
+	pPrevVertex = pNextVertex->pPrev;
+	pNewVertex->pPrev = pPrevVertex;
+	pPrevVertex->pNext = pNewVertex;
+	pNewVertex->pNext = pNextVertex;
+	pNextVertex->pPrev = pNewVertex;
 
-	vNew->pHalfEdge = eOrig;
+	pNewVertex->pHalfEdge = pEdgeOrig;
 	/* leave coords, s, t undefined */
 
 	/* fix other edges on this vertex loop */
-	e = eOrig;
-	do {
-		e->pOrigin = vNew;
-		e = e->Onext;
-	} while (e != eOrig) ;
+	pEdge = pEdgeOrig;
+	do 
+    {
+		pEdge->pOrigin = pNewVertex;
+		pEdge = pEdge->Onext;
+	} while (pEdge != pEdgeOrig) ;
 }
 
 /* MakeFace (newFace, eOrig, fNext)  attaches a new face and makes it the left
@@ -148,93 +148,95 @@ static void MakeVertex (
 * the new face *before* fNext so that algorithms which walk the face
 * list will not see the newly created faces.
 */
-static void MakeFace (TFace *newFace, THalfEdge *eOrig, TFace *fNext) 
+static void MakeFace(TFace *pNewFace, THalfEdge *pEdgeOrig, TFace *pNextFace) 
 {
-	THalfEdge *e;
-	TFace *fPrev;
-	TFace *fNew = newFace;
+	THalfEdge *pEdge = NULL;
+	TFace *pPrevFace = NULL;
 
-	assert(fNew != NULL); 
+	assert(pNewFace != NULL); 
 
 	/* insert in circular doubly-linked list before fNext */
-	fPrev = fNext->pPrev;
-	fNew->pPrev = fPrev;
-	fPrev->pNext = fNew;
-	fNew->pNext = fNext;
-	fNext->pPrev = fNew;
+	pPrevFace = pNextFace->pPrev;
+	pNewFace->pPrev = pPrevFace;
+	pPrevFace->pNext = pNewFace;
+	pNewFace->pNext = pNextFace;
+	pNextFace->pPrev = pNewFace;
 
-	fNew->pHalfEdge = eOrig;
-	fNew->pTrail = NULL;
-	fNew->bMarked = FALSE;
+	pNewFace->pHalfEdge = pEdgeOrig;
+	pNewFace->pTrail = NULL;
+	pNewFace->bMarked = false;
 
 	/* The new face is marked "inside" if the old one was.  This is a
 	* convenience for the common case where a face has been split in two.
 	*/
-	fNew->bInside = fNext->bInside;
+	pNewFace->bInside = pNextFace->bInside;
 
 	/* fix other edges on this face loop */
-	e = eOrig;
-	do {
-		e->Lface = fNew;
-		e = e->Lnext;
-	} while (e != eOrig) ;
+	pEdge = pEdgeOrig;
+	do 
+    {
+		pEdge->Lface = pNewFace;
+		pEdge = pEdge->Lnext;
+	} while (pEdge != pEdgeOrig) ;
 }
 
 /* KillEdge (eDel)  destroys an edge (the half-edges eDel and eDel->Sym),
 * and removes from the global edge list.
 */
-static void KillEdge (TMesh *mesh, THalfEdge *eDel) 
+static void KillEdge(TMesh *pMesh, THalfEdge *pEdgeDel) 
 {
-	THalfEdge *ePrev, *eNext;
+	THalfEdge *pPrevEdge = NULL, *pNextEdge = NULL;
 
 	/* Half-edges are allocated in pairs, see EdgePair above */
-	if (eDel->Sym < eDel)  { eDel = eDel->Sym; }
+	if (pEdgeDel->Sym < pEdgeDel)  { pEdgeDel = pEdgeDel->Sym; }
 
 	/* delete from circular doubly-linked list */
-	eNext = eDel->pNext;
-	ePrev = eDel->Sym->pNext;
-	eNext->Sym->pNext = ePrev;
-	ePrev->Sym->pNext = eNext;
+	pNextEdge = pEdgeDel->pNext;
+	pPrevEdge = pEdgeDel->Sym->pNext;
+	pNextEdge->Sym->pNext = pPrevEdge;
+	pPrevEdge->Sym->pNext = pNextEdge;
 
-	BucketFree (mesh->pEdgeBucket, eDel) ;
+	BucketFree(pMesh->pEdgeBucket, pEdgeDel);
 }
 
 
 /* KillVertex (vDel)  destroys a vertex and removes it from the global
 * vertex list.  It updates the vertex loop to point to a given new vertex.
 */
-static void KillVertex (TMesh *mesh, TVertex *vDel, TVertex *newOrg) 
+static void KillVertex(TMesh *pMesh, TVertex *pVDel, TVertex *pNewOrg) 
 {
-	THalfEdge *e, *eStart = vDel->pHalfEdge;
-	TVertex *vPrev, *vNext;
+	THalfEdge *pEdge = NULL, *pEdgeStart = pVDel->pHalfEdge;
+	TVertex *pVertexPrev = NULL, *pVertexNext = NULL;
 
 	/* change the origin of all affected edges */
-	e = eStart;
-	do {
-		e->pOrigin = newOrg;
-		e = e->Onext;
-	} while (e != eStart) ;
+	pEdge = pEdgeStart;
+	do 
+    {
+		pEdge->pOrigin = pNewOrg;
+		pEdge = pEdge->Onext;
+	} while (pEdge != pEdgeStart) ;
 
 	/* delete from circular doubly-linked list */
-	vPrev = vDel->pPrev;
-	vNext = vDel->pNext;
-	vNext->pPrev = vPrev;
-	vPrev->pNext = vNext;
+	pVertexPrev = pVDel->pPrev;
+	pVertexNext = pVDel->pNext;
+	pVertexNext->pPrev = pVertexPrev;
+	pVertexPrev->pNext = pVertexNext;
 
-	BucketFree (mesh->pVertexBucket, vDel) ;
+	BucketFree(pMesh->pVertexBucket, pVDel);
 }
 
 /* KillFace (fDel)  destroys a face and removes it from the global face
 * list.  It updates the face loop to point to a given new face.
 */
-static void KillFace (TMesh *mesh, TFace *fDel, TFace *newLface) 
+static void KillFace(TMesh *mesh, TFace *fDel, TFace *newLface) 
 {
 	THalfEdge *e, *eStart = fDel->pHalfEdge;
 	TFace *fPrev, *fNext;
 
 	/* change the left face of all affected edges */
 	e = eStart;
-	do {
+	do 
+    {
 		e->Lface = newLface;
 		e = e->Lnext;
 	} while (e != eStart) ;
@@ -254,27 +256,28 @@ static void KillFace (TMesh *mesh, TFace *fDel, TFace *newLface)
 /* tessMeshMakeEdge creates one edge, two vertices, and a loop (face).
 * The loop consists of the two new half-edges.
 */
-THalfEdge *tessMeshMakeEdge (TMesh *mesh) 
+THalfEdge *tessMeshMakeEdge(TMesh *pMesh) 
 {
-	TVertex *newVertex1 = (TVertex*)BucketAlloc(mesh->pVertexBucket);
-	TVertex *newVertex2 = (TVertex*)BucketAlloc(mesh->pVertexBucket);
-	TFace *newFace = (TFace*)BucketAlloc(mesh->pFaceBucket);
+	TVertex *newVertex1 = (TVertex*)BucketAlloc(pMesh->pVertexBucket);
+	TVertex *newVertex2 = (TVertex*)BucketAlloc(pMesh->pVertexBucket);
+	TFace *newFace = (TFace*)BucketAlloc(pMesh->pFaceBucket);
 	THalfEdge *e;
 
 	/* if any one is null then all get freed */
-	if (newVertex1 == NULL || newVertex2 == NULL || newFace == NULL) {
-		if (newVertex1 != NULL) BucketFree (mesh->pVertexBucket, newVertex1) ;
-		if (newVertex2 != NULL) BucketFree (mesh->pVertexBucket, newVertex2) ;
-		if (newFace != NULL) BucketFree (mesh->pFaceBucket, newFace) ;     
+	if (newVertex1 == NULL || newVertex2 == NULL || newFace == NULL) 
+    {
+		if (newVertex1 != NULL) BucketFree (pMesh->pVertexBucket, newVertex1) ;
+		if (newVertex2 != NULL) BucketFree (pMesh->pVertexBucket, newVertex2) ;
+		if (newFace != NULL) BucketFree (pMesh->pFaceBucket, newFace) ;     
 		return NULL;
 	} 
 
-	e = MakeEdge (mesh, &mesh->eHead) ;
+	e = MakeEdge (pMesh, &pMesh->eHead) ;
 	if (e == NULL) return NULL;
 
-	MakeVertex (newVertex1, e, &mesh->vHead) ;
-	MakeVertex (newVertex2, e->Sym, &mesh->vHead) ;
-	MakeFace (newFace, e, &mesh->fHead) ;
+	MakeVertex (newVertex1, e, &pMesh->vHead) ;
+	MakeVertex (newVertex2, e->Sym, &pMesh->vHead) ;
+	MakeFace (newFace, e, &pMesh->fHead) ;
 	return e;
 }
 
@@ -302,48 +305,50 @@ THalfEdge *tessMeshMakeEdge (TMesh *mesh)
 * If eDst == eOrg->Onext, the new vertex will have a single edge.
 * If eDst == eOrg->Oprev, the old vertex will have a single edge.
 */
-int tessMeshSplice (TMesh* mesh, THalfEdge *eOrg, THalfEdge *eDst) 
+int tessMeshSplice(TMesh* pMesh, THalfEdge *pEdgeOrg, THalfEdge *pEdgeDst) 
 {
-	int joiningLoops = FALSE;
-	int joiningVertices = FALSE;
+	int bJoiningLoops = false;
+	int bJoiningVertices = false;
 
-	if (eOrg == eDst)  return 1;
+	if (pEdgeOrg == pEdgeDst) return 1;
 
-	if (eDst->pOrigin != eOrg->pOrigin)  {
+	if (pEdgeDst->pOrigin != pEdgeOrg->pOrigin)  
+    {
 		/* We are merging two disjoint vertices -- destroy eDst->Org */
-		joiningVertices = TRUE;
-		KillVertex (mesh, eDst->pOrigin, eOrg->pOrigin) ;
+		bJoiningVertices = true;
+		KillVertex(pMesh, pEdgeDst->pOrigin, pEdgeOrg->pOrigin);
 	}
-	if (eDst->Lface != eOrg->Lface)  {
+	if (pEdgeDst->Lface != pEdgeOrg->Lface)  
+    {
 		/* We are connecting two disjoint loops -- destroy eDst->Lface */
-		joiningLoops = TRUE;
-		KillFace (mesh, eDst->Lface, eOrg->Lface) ;
+		bJoiningLoops = true;
+		KillFace(pMesh, pEdgeDst->Lface, pEdgeOrg->Lface);
 	}
 
 	/* Change the edge structure */
-	Splice (eDst, eOrg) ;
+	Splice(pEdgeDst, pEdgeOrg);
 
-	if  (! joiningVertices)  
+	if (!bJoiningVertices)
     {
-		TVertex *newVertex = (TVertex*)BucketAlloc (mesh->pVertexBucket) ;
-		if (newVertex == NULL) return 0;
+		TVertex *pNewVertex = (TVertex*)BucketAlloc(pMesh->pVertexBucket);
+		if (pNewVertex == NULL) return 0;
 
 		/* We split one vertex into two -- the new vertex is eDst->Org.
 		* Make sure the old vertex points to a valid half-edge.
 		*/
-		MakeVertex (newVertex, eDst, eOrg->pOrigin) ;
-		eOrg->pOrigin->pHalfEdge = eOrg;
+		MakeVertex(pNewVertex, pEdgeDst, pEdgeOrg->pOrigin);
+		pEdgeOrg->pOrigin->pHalfEdge = pEdgeOrg;
 	}
-	if (! joiningLoops)  
+	if (!bJoiningLoops)  
     {
-		TFace *newFace = (TFace*)BucketAlloc (mesh->pFaceBucket) ;  
-		if (newFace == NULL) return 0;
+		TFace *pNewFace = (TFace*)BucketAlloc(pMesh->pFaceBucket);
+		if (pNewFace == NULL) return 0;
 
 		/* We split one loop into two -- the new loop is eDst->Lface.
 		* Make sure the old face points to a valid half-edge.
 		*/
-		MakeFace (newFace, eDst, eOrg->Lface) ;
-		eOrg->Lface->pHalfEdge = eOrg;
+		MakeFace(pNewFace, pEdgeDst, pEdgeOrg->Lface);
+		pEdgeOrg->Lface->pHalfEdge = pEdgeOrg;
 	}
 
 	return 1;
@@ -363,26 +368,31 @@ int tessMeshSplice (TMesh* mesh, THalfEdge *eOrg, THalfEdge *eDst)
 int tessMeshDelete (TMesh *mesh, THalfEdge *eDel) 
 {
 	THalfEdge *eDelSym = eDel->Sym;
-	int joiningLoops = FALSE;
+	int joiningLoops = false;
 
 	/* First step: disconnect the origin vertex eDel->Org.  We make all
 	* changes to get a consistent mesh in this "intermediate" state.
 	*/
-	if (eDel->Lface != eDel->Rface)  {
+	if (eDel->Lface != eDel->Rface)  
+    {
 		/* We are joining two loops into one -- remove the left face */
-		joiningLoops = TRUE;
+		joiningLoops = true;
 		KillFace (mesh, eDel->Lface, eDel->Rface) ;
 	}
 
-	if (eDel->Onext == eDel)  {
+	if (eDel->Onext == eDel)  
+    {
 		KillVertex (mesh, eDel->pOrigin, NULL) ;
-	} else {
+	} 
+    else 
+    {
 		/* Make sure that eDel->Org and eDel->Rface point to valid half-edges */
 		eDel->Rface->pHalfEdge = eDel->Oprev;
 		eDel->pOrigin->pHalfEdge = eDel->Onext;
 
 		Splice (eDel, eDel->Oprev) ;
-		if (! joiningLoops)  {
+		if (! joiningLoops)  
+        {
 			TFace *newFace= (TFace*)BucketAlloc (mesh->pFaceBucket) ;
 			if (newFace == NULL) return 0; 
 
@@ -394,10 +404,13 @@ int tessMeshDelete (TMesh *mesh, THalfEdge *eDel)
 	/* Claim: the mesh is now in a consistent state, except that eDel->Org
 	* may have been deleted.  Now we disconnect eDel->Dst.
 	*/
-	if (eDelSym->Onext == eDelSym)  {
+	if (eDelSym->Onext == eDelSym)  
+    {
 		KillVertex (mesh, eDelSym->pOrigin, NULL) ;
 		KillFace (mesh, eDelSym->Lface, NULL) ;
-	} else {
+	} 
+    else 
+    {
 		/* Make sure that eDel->Dst and eDel->Lface point to valid half-edges */
 		eDel->Lface->pHalfEdge = eDelSym->Oprev;
 		eDelSym->pOrigin->pHalfEdge = eDelSym->Onext;
@@ -487,21 +500,22 @@ THalfEdge *tessMeshSplitEdge (TMesh *mesh, THalfEdge *eOrg)
 THalfEdge *tessMeshConnect (TMesh *mesh, THalfEdge *eOrg, THalfEdge *eDst) 
 {
 	THalfEdge *eNewSym;
-	int joiningLoops = FALSE;  
+	int joiningLoops = false;  
 	THalfEdge *eNew = MakeEdge (mesh, eOrg) ;
 	if (eNew == NULL) return NULL;
 
 	eNewSym = eNew->Sym;
 
-	if (eDst->Lface != eOrg->Lface)  {
+	if (eDst->Lface != eOrg->Lface)  
+    {
 		/* We are connecting two disjoint loops -- destroy eDst->Lface */
-		joiningLoops = TRUE;
+		joiningLoops = true;
 		KillFace (mesh, eDst->Lface, eOrg->Lface) ;
 	}
 
 	/* Connect the new edge appropriately */
-	Splice (eNew, eOrg->Lnext) ;
-	Splice (eNewSym, eDst) ;
+	Splice(eNew, eOrg->Lnext) ;
+	Splice(eNewSym, eDst) ;
 
 	/* Set the vertex and face information */
 	eNew->pOrigin = eOrg->Dst;
@@ -511,7 +525,8 @@ THalfEdge *tessMeshConnect (TMesh *mesh, THalfEdge *eOrg, THalfEdge *eDst)
 	/* Make sure the old face points to a valid half-edge */
 	eOrg->Lface->pHalfEdge = eNewSym;
 
-	if (! joiningLoops)  {
+	if (! joiningLoops)  
+    {
 		TFace *newFace= (TFace*)BucketAlloc (mesh->pFaceBucket) ;
 		if (newFace == NULL) return NULL;
 
@@ -620,8 +635,8 @@ TMesh *tessMeshNewMesh (TAlloc* alloc)
 	f->pNext = f->pPrev = f;
 	f->pHalfEdge = NULL;
 	f->pTrail = NULL;
-	f->bMarked = FALSE;
-	f->bInside = FALSE;
+	f->bMarked = false;
+	f->bInside = false;
 
 	e->pNext = e;
 	e->Sym = eSym;

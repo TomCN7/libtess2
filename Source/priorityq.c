@@ -38,8 +38,8 @@
 
 #define INIT_SIZE	32
 
-#define TRUE 1
-#define FALSE 0
+#define true 1
+#define false 0
 
 #ifdef FOR_TRITE_TEST_PROGRAM
 #define LEQ(x,y)	(*pq->leq)(x,y)
@@ -105,7 +105,7 @@ TPriorityQHeap *pqHeapNewPriorityQ (TAlloc* alloc, int size, int (*leq)(PQkey ke
 		return NULL;
 	}
 
-	pq->nInitialized = FALSE;
+	pq->nInitialized = false;
 	pq->FreeList = 0;
 	pq->leq = leq;
 
@@ -185,7 +185,7 @@ void pqHeapInit (TPriorityQHeap *pq)
 	for (i = pq->nSize; i >= 1; --i)  {
 		FloatDown (pq, i) ;
 	}
-	pq->nInitialized = TRUE;
+	pq->nInitialized = true;
 }
 
 /* really pqHeapInsert */
@@ -315,7 +315,7 @@ TPriorityQ *pqNewPriorityQ (TAlloc* alloc, int size, int (*leq)(PQkey key1, PQke
 
 	pq->Size = 0;
 	pq->Max = size; //INIT_SIZE;
-	pq->nInitialized = FALSE;
+	pq->nInitialized = false;
 	pq->leq = leq;
 	
 	return pq;
@@ -403,7 +403,7 @@ int pqInit (TAlloc* alloc, TPriorityQ *pq)
 		}
 	}
 	pq->Max = pq->Size;
-	pq->nInitialized = TRUE;
+	pq->nInitialized = true;
 	pqHeapInit (pq->pHeap) ;  /* always succeeds */
 
 #ifndef NDEBUG
@@ -423,11 +423,13 @@ PQhandle pqInsert (TAlloc* alloc, TPriorityQ *pq, PQkey keyNew)
 {
 	int curr;
 
-	if (pq->nInitialized)  {
+	if (pq->nInitialized)  
+    {
 		return pqHeapInsert (alloc, pq->pHeap, keyNew) ;
 	}
 	curr = pq->Size;
-	if (++ pq->Size >= pq->Max)  {
+	if (++ pq->Size >= pq->Max)  
+    {
 		if (!alloc->MemRealloc)
 		{
 			return INV_HANDLE;

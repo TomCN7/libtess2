@@ -36,7 +36,7 @@
 
 int tessVertLeq (TVertex *u, TVertex *v) 
 {
-	/* Returns TRUE if u is lexicographically <= v. */
+	/* Returns true if u is lexicographically <= v. */
 
 	return VertLeq (u, v) ;
 }

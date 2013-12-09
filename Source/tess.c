@@ -41,8 +41,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TRUE 1
-#define FALSE 0
+#define true 1
+#define false 0
 
 #define Dot(u,v)	(u[0]*v[0] + u[1]*v[1] + u[2]*v[2])
 
@@ -212,7 +212,7 @@ void tessProjectPolygon(TTesselator *pTess)
 	TVertex *v, *vHead = &pTess->pMesh->vHead;
 	float fNorm[3];
 	float *sUnit, *tUnit;
-	int i, first, computedNormal = FALSE;
+	int i, first, computedNormal = false;
 
 	fNorm[0] = pTess->fNormal[0];
 	fNorm[1] = pTess->fNormal[1];
@@ -220,7 +220,7 @@ void tessProjectPolygon(TTesselator *pTess)
 	if (fNorm[0] == 0 && fNorm[1] == 0 && fNorm[2] == 0) 
     {
 		ComputeNormal(pTess, fNorm);
-		computedNormal = TRUE;
+		computedNormal = true;
 	}
 	sUnit = pTess->fsUnit;
 	tUnit = pTess->ftUnit;
@@ -431,7 +431,7 @@ void tessMeshDiscardExterior(TMesh *pMesh)
 * polygon have a winding number of "value", and regions outside
 * have a winding number of 0.
 *
-* If keepOnlyBoundary is TRUE, it also deletes all edges which do not
+* If keepOnlyBoundary is true, it also deletes all edges which do not
 * separate an interior region from an exterior one.
 */
 int tessMeshSetWindingNumber (
@@ -963,7 +963,7 @@ int tessTesselate(TTesselator *pTess, int nWindingRule, int nElementType,
 	*/
 	if (nElementType == TESS_BOUNDARY_CONTOURS) 
     {
-		rc = tessMeshSetWindingNumber(pMesh, 1, TRUE);
+		rc = tessMeshSetWindingNumber(pMesh, 1, true);
 	} 
     else 
     {
